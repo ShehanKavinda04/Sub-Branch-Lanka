@@ -17,7 +17,13 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
+  Send,
+  Info,
+  ThumbsUp,
+  ThumbsDown,
+  User,
+  Package
 } from 'lucide-react';
 import './AdminDashboard.css';
 import adminAvatar from '../../assets/admin_avatar.png';
@@ -33,6 +39,7 @@ const AdminDashboard = () => {
   const [refundSubTab, setRefundSubTab] = useState('New Requests (2)');
   const [analyticsSubTab, setAnalyticsSubTab] = useState('Sales Overview');
   const [timePeriod, setTimePeriod] = useState('Today');
+  const [selectedDispute, setSelectedDispute] = useState(null);
 
   const navItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -83,10 +90,10 @@ const AdminDashboard = () => {
   ];
 
   const disputes = [
-    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Pending' },
-    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Escalated' },
-    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Resolved' },
-    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Pending' },
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Pending', outcome: 'Full Refund' },
+    { id: '#1235', reason: 'Item significantly not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Escalated', outcome: 'Full Refund' },
+    { id: '#1236', reason: 'Non-delivery of items', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Resolved', outcome: 'Full Refund' },
+    { id: '#1237', reason: 'Damaged item', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Pending', outcome: 'Full Refund' },
   ];
 
   const productPerformance = [
@@ -408,39 +415,79 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const renderDisputeResolution = () => (
-    <div className="dispute-resolution-view">
+  const renderDisputeDetail = () => (
+    <div className="dispute-detail-view">
       <div className="admin-view-header">
-        <h2>Refund Workflow Management</h2>
-      </div>
-
-      <div className="filters-bar" style={{ justifyContent: 'flex-end', gap: '15px' }}>
-        <select className="filter-select"><option>Filter by Status</option></select>
-        <select className="filter-select"><option>All Sellers</option></select>
-      </div>
-
-      <div className="filters-bar" style={{ marginTop: '10px' }}>
-        <div className="search-bar-container" style={{ maxWidth: 'none' }}>
-          <Search size={18} />
-          <input type="text" placeholder="Search by order ID, Customer Name, ......" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setSelectedDispute(null)}>
+          <ChevronLeft size={24} />
+          <h2>Refund Workflow Management</h2>
         </div>
       </div>
 
+      <div className="dispute-detail-header-card">
+        <span className="dispute-id-label">Dispute ID {selectedDispute.id}</span>
+        <h3 className="dispute-title-large">{selectedDispute.reason}</h3>
+        <span className="pending-action-badge">Pending Admin Action</span>
+      </div>
+
+      <div className="dispute-detail-tabs">
+        <div className="dispute-detail-tab active">Summary</div>
+        <div className="dispute-detail-tab">Communication</div>
+        <div className="dispute-detail-tab">Evidence</div>
+      </div>
+
+      <div className="dispute-grid-layout">
+        <div className="detail-section-card">
+          <h4>Case Details</h4>
+          <div className="case-details-grid">
+            <div className="detail-item"><label>Buyer</label><span>{selectedDispute.buyer}</span></div>
+            <div className="detail-item"><label>Seller</label><span>{selectedDispute.seller}</span></div>
+            <div className="detail-item"><label>Item</label><span>{selectedDispute.item}</span></div>
+            <div className="detail-item"><label>Order ID</label><span>{selectedDispute.orderId}</span></div>
+            <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Dispute Reason</label><span>{selectedDispute.reason}</span></div>
+            <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Desired Outcome</label><span>{selectedDispute.outcome}</span></div>
+          </div>
+        </div>
+
+        <div className="action-info-group">
+          <div className="detail-section-card">
+            <h4>Action & Info</h4>
+            <div className="action-sub-group">
+              <label>Mediation Tools</label>
+              <button className="btn-primary-blue"><Send size={16} /> Send Message</button>
+              <div className="request-info-link"><Info size={14} /> Request More Info</div>
+            </div>
+            <div className="action-sub-group" style={{ marginTop: '20px' }}>
+              <label>Make a Decision</label>
+              <button className="btn-decision-buyer"><ThumbsUp size={16} /> Rule in Favor of Buyer</button>
+              <button className="btn-decision-seller"><ThumbsDown size={16} /> Rule in Favor of Seller</button>
+            </div>
+            <div className="action-sub-group" style={{ marginTop: '20px' }}>
+              <label>Related Information</label>
+              <div className="related-links-list">
+                <div className="related-link"><User size={14} /> View Buyer's Profile</div>
+                <div className="related-link"><User size={14} /> View Seller's Profile</div>
+                <div className="related-link"><Package size={14} /> View Product Page</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDisputeResolution = () => (
+    <div className="dispute-resolution-view">
+      <div className="admin-view-header"><h2>Refund Workflow Management</h2></div>
+      <div className="filters-bar" style={{ justifyContent: 'flex-end', gap: '15px' }}><select className="filter-select"><option>Filter by Status</option></select><select className="filter-select"><option>All Sellers</option></select></div>
+      <div className="filters-bar" style={{ marginTop: '10px' }}><div className="search-bar-container" style={{ maxWidth: 'none' }}><Search size={18} /><input type="text" placeholder="Search by order ID, Customer Name, ......" /></div></div>
       <div className="refund-card-grid" style={{ marginTop: '20px' }}>
         {disputes.map((dispute, index) => (
           <div className="dispute-card" key={index}>
-            <h4>Dispute {dispute.id} -</h4>
-            <p className="dispute-reason">{dispute.reason}</p>
-            <div className="dispute-info">
-              <span>Item: {dispute.item}</span>
-              <span>Buyer: {dispute.buyer}</span>
-            </div>
+            <h4>Dispute {dispute.id} -</h4><p className="dispute-reason">{dispute.reason}</p><div className="dispute-info"><span>Item: {dispute.item}</span><span>Buyer: {dispute.buyer}</span></div>
             <div className="dispute-footer">
               <span className={`status-badge ${dispute.status.toLowerCase()}`}>{dispute.status}</span>
-              <div className="view-details-link">
-                <Eye size={14} />
-                <span>View Details</span>
-              </div>
+              <div className="view-details-link" onClick={() => setSelectedDispute(dispute)}><Eye size={14} /><span>View Details</span></div>
             </div>
           </div>
         ))}
@@ -460,6 +507,7 @@ const AdminDashboard = () => {
   );
 
   const renderContent = () => {
+    if (activeTab === 'Dispute Resolution' && selectedDispute) return renderDisputeDetail();
     switch (activeTab) {
       case 'User Management': return renderUserManagement();
       case 'Seller Management': return renderSellerManagement();
@@ -480,7 +528,7 @@ const AdminDashboard = () => {
         <div className="sidebar-logo">LANKA CRAFT</div>
         <div className="admin-profile"><img src={adminAvatar} alt="Admin" className="admin-avatar" /><div className="admin-info"><h3>Ayodya Senavirathne</h3><p>Admin</p></div></div>
         <nav className="sidebar-nav">
-          {navItems.map((item) => (<div key={item.name} className={`nav-item ${activeTab === item.name ? 'active' : ''}`} onClick={() => setActiveTab(item.name)}>{item.icon}<span>{item.name}</span></div>))}
+          {navItems.map((item) => (<div key={item.name} className={`nav-item ${activeTab === item.name ? 'active' : ''}`} onClick={() => { setActiveTab(item.name); setSelectedDispute(null); }}>{item.icon}<span>{item.name}</span></div>))}
           <div className="nav-item-bottom"><div className="nav-item"><HelpCircle size={20} /><span>Help</span></div><div className="nav-item"><LogOut size={20} /><span>Logout</span></div></div>
         </nav>
       </aside>
