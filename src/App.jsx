@@ -19,6 +19,7 @@ import RefundMonitoring from "./Pages/RefundMonitoring/RefundMonitoring";
 import SellerDashboard from "./Pages/SellerDashboard/SellerDashboard"; 
 import PaymentPage from "./Pages/PaymentPage/PaymentPage";
 import OrderHistory from "./Pages/OrderHistory/OrderHistory";
+import AdminDashboard from "./Pages/AdminDashboard/AdminDashboard";
 
 /**
  * Main Application Component
@@ -35,7 +36,8 @@ function App() {
     "/payment", 
     "/product", 
     "/seller-dashboard",
-    "/order-history" 
+    "/order-history",
+    "/admin/dashboard" 
   ], []);
 
   // Determine if current path belongs to internal layout pages
@@ -76,6 +78,7 @@ function App() {
 
             {/* Admin & Seller Routes */}
             <Route path="/admin/refunds" element={<RefundMonitoring />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
           </Routes>
         </main>
