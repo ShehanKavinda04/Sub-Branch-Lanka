@@ -1,0 +1,64 @@
+/* Import Quicksand from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-bg: #F6F7F8;
+  --color-white: #FFFFFF;
+  --color-light: #F2E9E1;
+  --color-accent: #9C836C;
+  --color-primary: #6A4E42;
+  --color-black: #000000;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --border-radius: 12px; /* Slightly more rounded to match Quicksand feel */
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html, #root {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-black);
+  /* Global Font set to Quicksand */
+  font-family: 'Quicksand', sans-serif;
+  line-height: 1.6;
+}
+
+/* English Comments: 
+   Standardizing heading weights for a professional look 
+*/
+h1, h2, h3, h4 {
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+/* Layout container */
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Professional card style */
+.card {
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: 'Quicksand', sans-serif; /* Explicitly set for buttons */
+  font-weight: 600;
+  transition: var(--transition);
+}

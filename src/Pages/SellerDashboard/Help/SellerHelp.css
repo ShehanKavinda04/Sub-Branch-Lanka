@@ -1,0 +1,100 @@
+.help-container {
+  padding: 30px;
+  background-color: #fcfcfc;
+}
+
+.help-header {
+  text-align: center;
+  padding: 40px 0;
+  background: linear-gradient(135deg, #7d634d, #a67c52);
+  border-radius: 15px;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.help-header h1 { 
+  margin-bottom: 20px; 
+  font-size: 28px;
+  color: #ffffff;
+}
+
+.help-search input {
+  width: 60%;
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Categories Grid */
+.help-categories {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 50px;
+}
+
+.category-card {
+  background: white;
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.category-card:hover { transform: translateY(-5px); border-color: #7d634d; }
+.category-card .icon { font-size: 40px; display: block; margin-bottom: 15px; }
+.category-card h3 { font-size: 18px; margin-bottom: 10px; }
+.category-card p { font-size: 14px; color: #777; }
+
+/* FAQ Section */
+.faq-section { margin-bottom: 50px; }
+.faq-section h2 { margin-bottom: 25px; font-size: 22px; color: #333; }
+
+.faq-item {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.faq-item h4 { margin: 0 0 10px 0; color: #7d634d; }
+.faq-item p { margin: 0; color: #555; font-size: 14px; line-height: 1.6; }
+
+/* Contact Box */
+.contact-support {
+  background: #fff;
+  padding: 40px;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  text-align: center;
+}
+
+.support-box h3 { font-size: 24px; margin-bottom: 10px; }
+.contact-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 25px 0;
+}
+
+.email-btn, .chat-btn {
+  padding: 12px 30px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.email-btn { background: #eee; color: #333; }
+.chat-btn { background: #7d634d; color: white; }
+.email-btn:hover { background: #ddd; }
+.chat-btn:hover { background: #5e4a3a; }
+
+.phone-text { color: #888; font-size: 14px; }

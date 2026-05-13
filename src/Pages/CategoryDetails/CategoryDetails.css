@@ -1,0 +1,135 @@
+/* Main Page Wrapper */
+.category-detail-page {
+  padding: 50px 0;
+  background-color: #fcfcfc;
+  min-height: 100vh;
+}
+
+/* Page Layout Container */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* Page Heading Section */
+.category-detail-header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px 20px;
+}
+
+.category-detail-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+/* Product Grid Layout - 4 Columns */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+/* Individual Product Card */
+.detail-product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.detail-product-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Image Section within Card */
+.detail-img-wrapper {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.detail-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Product Title and Info */
+.p-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 5px;
+  height: 36px;
+  overflow: hidden;
+}
+
+.shop-name {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+/* Price and Rating Alignment */
+.price-rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.price {
+  font-weight: 800;
+  font-size: 15px;
+  color: #333;
+}
+
+.stars {
+  color: #ffc107;
+  font-size: 10px;
+}
+
+/* "Shop Now" Action Button */
+.shop-now-btn {
+  background-color: #6d4c41; /* Primary Brown Theme */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 25px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Empty State Styling */
+.no-products {
+  grid-column: span 4;
+  text-align: center;
+  padding: 50px;
+  color: #888;
+}
+
+/* --- Responsive Media Queries --- */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .products-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mobile Devices */
+@media (max-width: 600px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .category-detail-page { padding: 30px 10px; }
+}

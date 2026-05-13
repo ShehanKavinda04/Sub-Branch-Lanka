@@ -1,0 +1,138 @@
+.categories-page-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  background-color: var(--color-white);
+}
+
+/* Header Section */
+.categories-page-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.main-title {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.sub-title {
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Responsive Grid */
+.categories-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Card Styling */
+.category-explorer-card {
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.category-explorer-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(106, 78, 66, 0.1);
+}
+
+.category-img-container {
+  height: 220px;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+
+.category-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.category-explorer-card:hover .category-img-container img {
+  transform: scale(1.08);
+}
+
+.category-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.category-name {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.category-item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.category-item-list li {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  margin-bottom: 0.4rem;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.category-item-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+}
+
+/* Button Styling */
+.category-view-btn {
+  margin-top: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: fit-content;
+  transition: gap 0.2s;
+}
+
+.category-view-btn .arrow {
+  transition: transform 0.2s;
+}
+
+.category-view-btn:hover .arrow {
+  transform: translateX(5px);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2rem;
+  }
+  .categories-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}

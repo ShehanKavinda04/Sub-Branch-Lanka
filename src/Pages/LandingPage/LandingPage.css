@@ -1,0 +1,121 @@
+/* Layout Settings */
+.landing-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  overflow-x: hidden;
+}
+
+/* Category Section Styling */
+.category-section {
+  margin: 4rem 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.view-all-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.view-all-link:hover {
+  color: var(--color-accent);
+  transform: translateX(4px);
+}
+
+/* Horizontal Scroll with hidden scrollbar */
+.scroll-wrapper {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scrollbar-width: none; /* Firefox */
+}
+
+.scroll-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.category-item {
+  flex: 0 0 auto;
+  width: 200px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease;
+}
+
+.category-item:hover {
+  transform: translateY(-5px);
+}
+
+.image-holder {
+  position: relative;
+  aspect-ratio: 1 / 1;
+}
+
+.image-holder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-label {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.category-item:hover .overlay-label {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.overlay-label span {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* Featured Products Grid */
+.featured-section {
+  margin: 5rem 0;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.product-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .landing-container {
+    padding: 0 1rem;
+  }
+  
+  .product-layout-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}

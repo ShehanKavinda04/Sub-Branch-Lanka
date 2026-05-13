@@ -1,0 +1,44 @@
+/* Header eka, thani line ekata ganna */
+.sub-page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-radius: 15px;
+  padding: 20px 0;
+}
+
+.title-group h2 {
+  margin-left: 20px;
+  font-size: 22px;
+}
+
+.title-group p {
+  margin-left: 20px;
+  color: #777;
+  font-size: 14px;
+}
+
+/* for button */
+.action-btn-sm {
+  background-color: #6A4E42;
+  border: 1.5px solid #a67c52;
+  color: #fff;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-weight: bold; 
+  cursor: pointer;
+  transition: 0.3s;
+  margin-right: 10px;
+}
+
+.action-btn-sm:hover {
+  background-color: #a67c52;
+  color: white;
+}
+
+/* Status colors */
+.status-tag.pending { background: #fff3e0; color: #ef6c00; }
+.status-tag.shipped { background: #e3f2fd; color: #1976d2; }
+.status-tag.completed { background: #e8f5e9; color: #2e7d32; }
+.status-tag.cancelled { background: #ffebee; color: #c62828; }

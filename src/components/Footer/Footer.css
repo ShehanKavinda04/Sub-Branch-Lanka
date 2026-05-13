@@ -1,0 +1,124 @@
+.main-footer {
+  background-color: var(--color-light); /* #F2E9E1 from your palette */
+  padding: 4rem 2rem 2rem 2rem;
+  margin-top: 5rem;
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 2fr 1fr 1.5fr;
+  }
+}
+
+/* About Section Styles */
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.footer-description {
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.social-icon {
+  color: var(--color-primary);
+  transition: transform 0.2s ease;
+}
+
+.social-icon:hover {
+  transform: translateY(-3px);
+  color: var(--color-black);
+}
+
+/* List Styles */
+.footer-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1.25rem;
+}
+
+.footer-nav {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-nav li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-nav a {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  transition: var(--transition);
+}
+
+.footer-nav a:hover {
+  color: var(--color-primary);
+  padding-left: 5px;
+}
+
+/* Newsletter Styles */
+.footer-subtext {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  margin-bottom: 1rem;
+}
+
+.newsletter-form {
+  display: flex;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.newsletter-input {
+  flex: 1;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.newsletter-btn {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 0 1.5rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.newsletter-btn:hover {
+  background-color: var(--color-black);
+}
+
+.footer-bottom {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(106, 78, 66, 0.1);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
