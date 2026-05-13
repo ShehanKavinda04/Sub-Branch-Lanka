@@ -23,7 +23,11 @@ import {
   ThumbsUp,
   ThumbsDown,
   User,
-  Package
+  Package,
+  Store,
+  Download,
+  FileText as FileIcon,
+  Video
 } from 'lucide-react';
 import './AdminDashboard.css';
 import adminAvatar from '../../assets/admin_avatar.png';
@@ -40,6 +44,7 @@ const AdminDashboard = () => {
   const [analyticsSubTab, setAnalyticsSubTab] = useState('Sales Overview');
   const [timePeriod, setTimePeriod] = useState('Today');
   const [selectedDispute, setSelectedDispute] = useState(null);
+  const [disputeTab, setDisputeTab] = useState('Summary');
 
   const navItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -90,11 +95,34 @@ const AdminDashboard = () => {
   ];
 
   const disputes = [
-    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Pending', outcome: 'Full Refund' },
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Ayodya Senavirathne', seller: 'Silk Waves', orderId: '#ORD 1234', status: 'Pending', outcome: 'Full Refund' },
     { id: '#1235', reason: 'Item significantly not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Escalated', outcome: 'Full Refund' },
     { id: '#1236', reason: 'Non-delivery of items', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Resolved', outcome: 'Full Refund' },
     { id: '#1237', reason: 'Damaged item', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', seller: 'Crafty Hands', orderId: '#ORD 1234', status: 'Pending', outcome: 'Full Refund' },
   ];
+
+  const messages = [
+    { sender: 'Ayodya Senavirathne', role: 'Buyer', time: 'yesterday at 5:45 PM', content: 'Hello, I received the saree today but, the color are completely different from what shown in the picture. It\'s much darker and the pattern is not as intricate. I\'m Quite disappointed.', type: 'buyer' },
+    { sender: 'Silk Waves', role: 'Seller', time: 'yesterday at 5:10 PM', content: 'We are sorry to hear that. Each batik piece is handmade and unique, so slight variations in color can occur due to the dyeing process. The lighting in the photos might also affect the appearance.', type: 'seller' },
+    { sender: 'Ayodya Senavirathne', role: 'Buyer', time: 'Today at 9:32 AM', content: 'I understand slight variations, but this is a significant difference. It\'s not what I paid for. I would like to request a full refund and return the item.', type: 'buyer' },
+    { sender: 'Nayani Silva', role: 'Admin', time: 'Today at 11:05 AM', content: 'Hello both. I am stepping in to help mediate this dispute. @Anura Perera, could you please upload photos of the saree you received to the \'Evidence\' tab? @Crafty Hands LK, could you provide any information about your return policy? Thank you.', type: 'admin' },
+  ];
+
+  const buyerEvidence = {
+    uploadedBy: 'Anura Perera',
+    date: '24-Jun-2023',
+    images: [sareeImg, sareeImg],
+    count: 2
+  };
+
+  const sellerEvidence = {
+    uploadedBy: 'Silk Waves',
+    date: '25-Jul-2023',
+    files: [
+      { name: 'product_description.pdf', size: '1.2 MB', type: 'pdf' },
+      { name: 'packaging_video.mp4.pdf', size: '15.8 MB', type: 'video' }
+    ]
+  };
 
   const productPerformance = [
     { name: 'Batik Sarees', sold: 350, orders: 120, revenue: 'LKR 42,000', category: 'Apparel' },
@@ -423,51 +451,73 @@ const AdminDashboard = () => {
           <h2>Refund Workflow Management</h2>
         </div>
       </div>
-
-      <div className="dispute-detail-header-card">
-        <span className="dispute-id-label">Dispute ID {selectedDispute.id}</span>
-        <h3 className="dispute-title-large">{selectedDispute.reason}</h3>
-        <span className="pending-action-badge">Pending Admin Action</span>
-      </div>
-
+      <div className="dispute-detail-header-card"><span className="dispute-id-label">Dispute ID {selectedDispute.id}</span><h3 className="dispute-title-large">{selectedDispute.reason}</h3><span className="pending-action-badge">Pending Admin Action</span></div>
       <div className="dispute-detail-tabs">
-        <div className="dispute-detail-tab active">Summary</div>
-        <div className="dispute-detail-tab">Communication</div>
-        <div className="dispute-detail-tab">Evidence</div>
+        <div className={`dispute-detail-tab ${disputeTab === 'Summary' ? 'active' : ''}`} onClick={() => setDisputeTab('Summary')}>Summary</div>
+        <div className={`dispute-detail-tab ${disputeTab === 'Communication' ? 'active' : ''}`} onClick={() => setDisputeTab('Communication')}>Communication</div>
+        <div className={`dispute-detail-tab ${disputeTab === 'Evidence' ? 'active' : ''}`} onClick={() => setDisputeTab('Evidence')}>Evidence</div>
       </div>
-
       <div className="dispute-grid-layout">
         <div className="detail-section-card">
-          <h4>Case Details</h4>
-          <div className="case-details-grid">
-            <div className="detail-item"><label>Buyer</label><span>{selectedDispute.buyer}</span></div>
-            <div className="detail-item"><label>Seller</label><span>{selectedDispute.seller}</span></div>
-            <div className="detail-item"><label>Item</label><span>{selectedDispute.item}</span></div>
-            <div className="detail-item"><label>Order ID</label><span>{selectedDispute.orderId}</span></div>
-            <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Dispute Reason</label><span>{selectedDispute.reason}</span></div>
-            <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Desired Outcome</label><span>{selectedDispute.outcome}</span></div>
-          </div>
+          {disputeTab === 'Evidence' ? (
+            <div className="evidence-container">
+              <div className="evidence-block">
+                <h4>Buyer's Evidence</h4>
+                <p>Uploaded by {buyerEvidence.uploadedBy} on {buyerEvidence.date}</p>
+                <div className="evidence-image-grid">
+                  {buyerEvidence.images.map((img, i) => <img src={img} alt="Evidence" className="evidence-img" key={i} />)}
+                </div>
+                <div className="evidence-footer"><span>{buyerEvidence.count} images files</span><div className="download-link"><Download size={14} /> Download All</div></div>
+                <div className="admin-comments-section"><h5>Admin Comments</h5><div className="admin-comment-box"><input type="text" placeholder="Add a comment on Buyer's Evidence......" /><Send size={16} className="send-btn" /></div></div>
+              </div>
+              <div className="evidence-block">
+                <h4>Seller's Evidence</h4>
+                <p>Uploaded by {sellerEvidence.uploadedBy} on {sellerEvidence.date}</p>
+                <div className="file-list">
+                  {sellerEvidence.files.map((file, i) => (
+                    <div className="file-item" key={i}>
+                      <div className="file-info"><div className={`file-icon ${file.type === 'video' ? 'video' : ''}`}>{file.type === 'video' ? <Video size={18} /> : <FileIcon size={18} />}</div><div className="file-details"><h6>{file.name}</h6><span>{file.size}</span></div></div>
+                      <div className="file-actions"><Eye size={16} /><Download size={16} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : disputeTab === 'Communication' ? (
+            <div className="message-thread">
+              {messages.map((m, i) => (
+                <div className="message-item" key={i}>
+                  <div className={`message-avatar ${m.type}`}>{m.type === 'buyer' ? <User size={18} /> : m.type === 'seller' ? <Store size={18} /> : <User size={18} />}</div>
+                  <div className="message-content-wrapper">
+                    <div className="message-header"><div className="sender-info">{m.sender}<span className="sender-role">({m.role})</span></div><span className="message-time">{m.time}</span></div>
+                    <div className={`message-bubble ${m.type === 'admin' ? 'admin-note' : ''}`}>{m.content}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <h4>Case Details</h4>
+              <div className="case-details-grid">
+                <div className="detail-item"><label>Buyer</label><span>{selectedDispute.buyer}</span></div>
+                <div className="detail-item"><label>Seller</label><span>{selectedDispute.seller}</span></div>
+                <div className="detail-item"><label>Item</label><span>{selectedDispute.item}</span></div>
+                <div className="detail-item"><label>Order ID</label><span>{selectedDispute.orderId}</span></div>
+                <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Dispute Reason</label><span>{selectedDispute.reason}</span></div>
+                <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Desired Outcome</label><span>{selectedDispute.outcome}</span></div>
+              </div>
+            </>
+          )}
         </div>
-
         <div className="action-info-group">
           <div className="detail-section-card">
             <h4>Action & Info</h4>
-            <div className="action-sub-group">
-              <label>Mediation Tools</label>
-              <button className="btn-primary-blue"><Send size={16} /> Send Message</button>
-              <div className="request-info-link"><Info size={14} /> Request More Info</div>
-            </div>
-            <div className="action-sub-group" style={{ marginTop: '20px' }}>
-              <label>Make a Decision</label>
-              <button className="btn-decision-buyer"><ThumbsUp size={16} /> Rule in Favor of Buyer</button>
-              <button className="btn-decision-seller"><ThumbsDown size={16} /> Rule in Favor of Seller</button>
-            </div>
+            <div className="action-sub-group"><label>Mediation Tools</label><button className="btn-primary-blue"><Send size={16} /> Send Message</button><div className="request-info-link"><Info size={14} /> Request More Info</div></div>
+            <div className="action-sub-group" style={{ marginTop: '20px' }}><label>Make a Decision</label><button className="btn-decision-buyer"><ThumbsUp size={16} /> Rule in Favor of Buyer</button><button className="btn-decision-seller"><ThumbsDown size={16} /> Rule in Favor of Seller</button></div>
             <div className="action-sub-group" style={{ marginTop: '20px' }}>
               <label>Related Information</label>
               <div className="related-links-list">
-                <div className="related-link"><User size={14} /> View Buyer's Profile</div>
-                <div className="related-link"><User size={14} /> View Seller's Profile</div>
-                <div className="related-link"><Package size={14} /> View Product Page</div>
+                <div className="related-link"><User size={14} /> View Buyer's Profile</div><div className="related-link"><User size={14} /> View Seller's Profile</div><div className="related-link"><Package size={14} /> View Product Page</div>
               </div>
             </div>
           </div>
