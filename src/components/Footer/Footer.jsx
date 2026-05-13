@@ -1,5 +1,5 @@
 import React from 'react';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 import './Footer.css';
 
 /**
@@ -20,9 +20,9 @@ export default function Footer() {
               craftsmanship to the world through authentic handmade products.
             </p>
             <div className="social-links">
-              <a href="https://facebook.com" aria-label="Facebook" className="social-icon"><Facebook size={20} /></a>
-              <a href="https://instagram.com" aria-label="Instagram" className="social-icon"><Instagram size={20} /></a>
-              <a href="https://twitter.com" aria-label="Twitter" className="social-icon"><Twitter size={20} /></a>
+              <a href="https://facebook.com" aria-label="Facebook" className="social-icon"><FaFacebook size={20} /></a>
+              <a href="https://instagram.com" aria-label="Instagram" className="social-icon"><FaInstagram size={20} /></a>
+              <a href="https://twitter.com" aria-label="Twitter" className="social-icon"><FaTwitter size={20} /></a>
             </div>
           </div>
 
