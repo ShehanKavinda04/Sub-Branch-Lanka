@@ -305,6 +305,43 @@
   min-width: 150px;
 }
 
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  background-color: var(--white);
+  border: 1px solid #E0E0E0;
+  border-radius: 30px;
+  padding: 8px 20px;
+  gap: 10px;
+  flex-grow: 1;
+  max-width: 400px;
+}
+
+.search-bar-container input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.search-bar-container input::placeholder {
+  color: var(--text-secondary);
+}
+
+.seller-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seller-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .product-table-card {
   background: var(--white);
   padding: 20px;
@@ -438,6 +475,59 @@ td {
   border: 1px solid #FFCDD2;
 }
 
+/* Order Monitoring Status Badges */
+.status-badge.paid {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+  border: 1px solid #A5D6A7;
+}
+
+.status-badge.unpaid {
+  background-color: #FFEBEE;
+  color: #F44336;
+  border: 1px solid #FFCDD2;
+}
+
+.status-badge.completed {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+  border: 1px solid #A5D6A7;
+}
+
+.status-badge.pending-shipment {
+  background-color: #FFF3E0;
+  color: #FF9800;
+  border: 1px solid #FFCCBC;
+}
+
+.status-badge.cancelled {
+  background-color: #FFEBEE;
+  color: #F44336;
+  border: 1px solid #FFCDD2;
+}
+
+.status-badge.shipped {
+  background-color: #E3F2FD;
+  color: #2196F3;
+  border: 1px solid #BBDEFB;
+}
+
+.action-view-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.action-view-btn:hover {
+  color: var(--accent-color);
+  transform: scale(1.1);
+}
+
 .action-links {
   display: flex;
   gap: 15px;
@@ -446,6 +536,453 @@ td {
 .edit-link { color: #4CAF50; cursor: pointer; }
 .approve-link { color: #4CAF50; cursor: pointer; }
 .suspend-link { color: #F44336; cursor: pointer; }
+
+/* Product Approval Action Buttons */
+.action-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--white);
+  min-width: 65px;
+}
+
+.action-btn.approve { background-color: #4CAF50; }
+.action-btn.reject { background-color: #F44336; }
+.action-btn.request-edit { background-color: #FF9800; }
+.action-btn.view-details { background-color: #5C6BC0; }
+
+.action-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.banner-preview-img {
+  width: 60px;
+  height: 35px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.status-badge.published {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+  border: 1px solid #A5D6A7;
+}
+
+.status-badge.scheduled {
+  background-color: #E3F2FD;
+  color: #2196F3;
+  border: 1px solid #BBDEFB;
+}
+
+.delete-link { color: #F44336; cursor: pointer; }
+
+.delete-link { color: #F44336; cursor: pointer; }
+
+/* System Settings Styles */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.settings-card {
+  background: var(--white);
+  padding: 0;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+.settings-card-header {
+  padding: 15px 25px;
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #F1F1F1;
+}
+
+.settings-card-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.settings-card-body {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-input {
+  background-color: #F8F9FA;
+  border: 1px solid #F1F1F1;
+  border-radius: 6px;
+  padding: 12px 15px;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition);
+}
+
+.settings-input:focus {
+  border-color: var(--accent-color);
+  background-color: var(--white);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-preview {
+  width: 60px;
+  height: 60px;
+  background-color: #E0E0E0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.upload-btn {
+  background-color: #F1E6DA;
+  color: #4A3E31;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.upload-btn:hover {
+  background-color: #EBD9CA;
+}
+
+.settings-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-info h4 {
+  font-size: 14px;
+  margin: 0 0 4px 0;
+}
+
+.toggle-info p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #E0E0E0;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #8D6E63;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.localization-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Refund Workflow Styles */
+.refund-tabs {
+  display: flex;
+  gap: 40px;
+  border-bottom: 1px solid #E0E0E0;
+  margin-bottom: 30px;
+}
+
+.refund-tab {
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+}
+
+.refund-tab.active {
+  color: var(--text-primary);
+}
+
+.refund-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--text-primary);
+}
+
+.refund-tab.awaiting {
+  color: #F44336;
+}
+
+.refund-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+.refund-card {
+  background: var(--white);
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.refund-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.refund-card-header h4 {
+  font-size: 16px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.refund-card-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.refund-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid #F1F1F1;
+}
+
+.refund-customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customer-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.refund-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.refund-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Sales & Analytics Styles */
+.time-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.time-filter-pill {
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition);
+  background-color: var(--white);
+  border: 1px solid #F1F1F1;
+}
+
+.time-filter-pill.active {
+  background-color: #5D4037;
+  color: var(--white);
+  border-color: #5D4037;
+}
+
+.donut-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.donut-svg {
+  width: 140px;
+  height: 140px;
+  transform: rotate(-90deg);
+}
+
+.donut-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.donut-center-text .value {
+  font-size: 18px;
+  font-weight: 700;
+  display: block;
+}
+
+.donut-center-text .label {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.donut-legend {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.legend-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.legend-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Product Sales Specific Styles */
+.variations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.variation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #F8F9FA;
+}
+
+.variation-info h5 {
+  font-size: 13px;
+  margin: 0 0 2px 0;
+  color: var(--text-primary);
+}
+
+.variation-info p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.variation-revenue {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
 @media (max-width: 1200px) {
   .stats-grid {
