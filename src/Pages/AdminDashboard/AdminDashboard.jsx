@@ -97,34 +97,36 @@ const AdminDashboard = () => {
     { name: 'Wooden Elephant - Small', sold: '30 units sold', revenue: 'LKR 38,450' },
   ];
 
+  const topSellers = [
+    { name: 'Silk Waves', revenue: 'LKR 68,500', percent: 90 },
+    { name: 'Crafty Hands', revenue: 'LKR 52,000', percent: 75 },
+    { name: 'Ceylon Pottery', revenue: 'LKR 46,400', percent: 65 },
+    { name: 'Wood Art', revenue: 'LKR 42,550', percent: 55 },
+    { name: 'Batik LK', revenue: 'LKR 42,550', percent: 50 },
+  ];
+
+  const sellerPerformance = [
+    { name: 'Silk Waves', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
+    { name: 'Crafty Hands', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
+    { name: 'Ceylon Pottery', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
+    { name: 'Wood Art', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
+  ];
+
   const renderDashboard = () => (
     <>
       <section className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-title">Total Sales</div><div className="stat-value">LKR 124,500</div><div className="stat-change positive">+5.2% this month</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">New Orders</div><div className="stat-value">25</div><div className="stat-change positive">+10%</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">New Sellers</div><div className="stat-value">10</div><div className="stat-change positive">+25%</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">Pending Products</div><div className="stat-value">15</div><div className="stat-change">+15%</div>
-        </div>
+        <div className="stat-card"><div className="stat-title">Total Sales</div><div className="stat-value">LKR 124,500</div><div className="stat-change positive">+5.2% this month</div></div>
+        <div className="stat-card"><div className="stat-title">New Orders</div><div className="stat-value">25</div><div className="stat-change positive">+10%</div></div>
+        <div className="stat-card"><div className="stat-title">New Sellers</div><div className="stat-value">10</div><div className="stat-change positive">+25%</div></div>
+        <div className="stat-card"><div className="stat-title">Pending Products</div><div className="stat-value">15</div><div className="stat-change">+15%</div></div>
       </section>
-
       <section className="charts-grid">
         <div className="chart-card">
-          <div className="chart-header">
-            <div className="chart-title"><h4>Sales Over Time</h4><div className="chart-subtitle">LKR 45,600</div><div className="stat-change positive">this month +5.2%</div></div>
-          </div>
+          <div className="chart-header"><div className="chart-title"><h4>Sales Over Time</h4><div className="chart-subtitle">LKR 45,600</div><div className="stat-change positive">this month +5.2%</div></div></div>
           <div className="chart-placeholder">
             <svg className="area-chart-svg" viewBox="0 0 400 150">
               <defs><linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#8D6E63" stopOpacity="0.5" /><stop offset="100%" stopColor="#8D6E63" stopOpacity="0" /></linearGradient></defs>
-              <path d="M0,120 Q50,80 100,100 T200,60 T300,110 T400,90 L400,150 L0,150 Z" fill="url(#gradient)" />
-              <path d="M0,120 Q50,80 100,100 T200,60 T300,110 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" />
-              <text x="0" y="145" fontSize="10" fill="#666">Week 1</text><text x="120" y="145" fontSize="10" fill="#666">Week 2</text><text x="240" y="145" fontSize="10" fill="#666">Week 3</text><text x="360" y="145" fontSize="10" fill="#666">Week 4</text>
+              <path d="M0,120 Q50,80 100,100 T200,60 T300,110 T400,90 L400,150 L0,150 Z" fill="url(#gradient)" /><path d="M0,120 Q50,80 100,100 T200,60 T300,110 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" /><text x="0" y="145" fontSize="10" fill="#666">Week 1</text><text x="120" y="145" fontSize="10" fill="#666">Week 2</text><text x="240" y="145" fontSize="10" fill="#666">Week 3</text><text x="360" y="145" fontSize="10" fill="#666">Week 4</text>
             </svg>
           </div>
         </div>
@@ -135,15 +137,12 @@ const AdminDashboard = () => {
           </div>
         </div>
       </section>
-
       <section className="product-table-card">
         <h3>Seller Management</h3>
         <table>
           <thead><tr><th>Seller Name</th><th>Status</th><th>Sales</th><th>Products</th><th>Action</th></tr></thead>
           <tbody>
-            {sellers.slice(0, 4).map((seller, index) => (
-              <tr key={index}><td>{seller.name}</td><td><span className={`status-badge ${seller.status.toLowerCase()}`}>{seller.status}</span></td><td>{seller.sales}</td><td>{seller.products}</td><td><div className="action-links">{seller.status === 'Pending' ? (<><span className="approve-link">Approve</span><span className="suspend-link">Suspend</span></>) : (<span className="edit-link">Edit</span>)}</div></td></tr>
-            ))}
+            {sellers.slice(0, 4).map((seller, index) => (<tr key={index}><td>{seller.name}</td><td><span className={`status-badge ${seller.status.toLowerCase()}`}>{seller.status}</span></td><td>{seller.sales}</td><td>{seller.products}</td><td><div className="action-links">{seller.status === 'Pending' ? (<><span className="approve-link">Approve</span><span className="suspend-link">Suspend</span></>) : (<span className="edit-link">Edit</span>)}</div></td></tr>))}
           </tbody>
         </table>
       </section>
@@ -159,13 +158,7 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th style={{ width: '40px' }}><input type="checkbox" className="table-checkbox" /></th><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td><input type="checkbox" className="table-checkbox" /></td>
-                <td><div className="product-cell"><img src={product.img} alt={product.name} className="product-img" /><span>{product.name}</span></div></td>
-                <td>{product.sku}</td><td>{product.price}</td><td>{product.stock}</td><td><span className={`status-badge ${product.status.toLowerCase().replace(' ', '-')}`}>{product.status}</span></td>
-              </tr>
-            ))}
+            {products.map((product) => (<tr key={product.id}><td><input type="checkbox" className="table-checkbox" /></td><td><div className="product-cell"><img src={product.img} alt={product.name} className="product-img" /><span>{product.name}</span></div></td><td>{product.sku}</td><td>{product.price}</td><td>{product.stock}</td><td><span className={`status-badge ${product.status.toLowerCase().replace(' ', '-')}`}>{product.status}</span></td></tr>))}
           </tbody>
         </table>
         <div className="pagination"><button className="page-btn"><ChevronLeft size={14} /></button><button className="page-btn active">1</button><button className="page-btn">2</button><button className="page-btn">3</button><button className="page-btn"><ChevronRight size={14} /></button></div>
@@ -181,9 +174,7 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th style={{ width: '40px' }}><input type="checkbox" className="table-checkbox" /></th><th>Seller/ Store Name</th><th>Date Registered</th><th>Total Sales</th><th>Products</th><th>Action</th></tr></thead>
           <tbody>
-            {sellers.map((seller, index) => (
-              <tr key={index}><td><input type="checkbox" className="table-checkbox" /></td><td><div className="seller-cell"><img src={seller.img} alt={seller.name} className="seller-img" /><span>{seller.name}</span></div></td><td>{seller.date}</td><td>{seller.sales}</td><td>{seller.products}</td><td><span className={`status-badge ${seller.status.toLowerCase()}`}>{seller.status}</span></td></tr>
-            ))}
+            {sellers.map((seller, index) => (<tr key={index}><td><input type="checkbox" className="table-checkbox" /></td><td><div className="seller-cell"><img src={seller.img} alt={seller.name} className="seller-img" /><span>{seller.name}</span></div></td><td>{seller.date}</td><td>{seller.sales}</td><td>{seller.products}</td><td><span className={`status-badge ${seller.status.toLowerCase()}`}>{seller.status}</span></td></tr>))}
           </tbody>
         </table>
         <div className="pagination"><button className="page-btn"><ChevronLeft size={14} /></button><button className="page-btn active">1</button><button className="page-btn">2</button><button className="page-btn">3</button><button className="page-btn"><ChevronRight size={14} /></button></div>
@@ -202,13 +193,7 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th style={{ width: '40px' }}><input type="checkbox" className="table-checkbox" /></th><th>Product</th><th>Seller</th><th>Submission Date</th><th>Action</th></tr></thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td><input type="checkbox" className="table-checkbox" /></td>
-                <td><div className="product-cell"><img src={product.img} alt={product.name} className="product-img" /><span>{product.name}</span></div></td>
-                <td>{product.seller}</td><td>{product.date}</td><td><div className="action-btn-group"><button className="action-btn approve">Approve</button><button className="action-btn reject">Reject</button><button className="action-btn request-edit">Request Edit</button><button className="action-btn view-details">View Details</button></div></td>
-              </tr>
-            ))}
+            {products.map((product) => (<tr key={product.id}><td><input type="checkbox" className="table-checkbox" /></td><td><div className="product-cell"><img src={product.img} alt={product.name} className="product-img" /><span>{product.name}</span></div></td><td>{product.seller}</td><td>{product.date}</td><td><div className="action-btn-group"><button className="action-btn approve">Approve</button><button className="action-btn reject">Reject</button><button className="action-btn request-edit">Request Edit</button><button className="action-btn view-details">View Details</button></div></td></tr>))}
           </tbody>
         </table>
         <div className="pagination"><button className="page-btn"><ChevronLeft size={14} /></button><button className="page-btn active">1</button><button className="page-btn">2</button><button className="page-btn">3</button><button className="page-btn"><ChevronRight size={14} /></button></div>
@@ -227,12 +212,7 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th style={{ width: '40px' }}><input type="checkbox" className="table-checkbox" /></th><th>Order ID</th><th>Date</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
-            {orders.slice(0, 4).map((order, index) => (
-              <tr key={index}>
-                <td><input type="checkbox" className="table-checkbox" /></td>
-                <td>{order.id}</td><td>{order.date}</td><td>{order.buyer}</td><td>{order.seller}</td><td>{order.amount}</td><td><span className={`status-badge ${order.payment.toLowerCase()}`}>{order.payment}</span></td><td><span className={`status-badge ${order.status.toLowerCase().replace(' ', '-')}`}>{order.status}</span></td><td><button className="action-view-btn"><Eye size={18} /></button></td>
-              </tr>
-            ))}
+            {orders.slice(0, 4).map((order, index) => (<tr key={index}><td><input type="checkbox" className="table-checkbox" /></td><td>{order.id}</td><td>{order.date}</td><td>{order.buyer}</td><td>{order.seller}</td><td>{order.amount}</td><td><span className={`status-badge ${order.payment.toLowerCase()}`}>{order.payment}</span></td><td><span className={`status-badge ${order.status.toLowerCase().replace(' ', '-')}`}>{order.status}</span></td><td><button className="action-view-btn"><Eye size={18} /></button></td></tr>))}
           </tbody>
         </table>
         <div className="pagination"><button className="page-btn"><ChevronLeft size={14} /></button><button className="page-btn active">1</button><button className="page-btn">2</button><button className="page-btn">3</button><button className="page-btn"><ChevronRight size={14} /></button></div>
@@ -248,9 +228,7 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th style={{ width: '40px' }}><input type="checkbox" className="table-checkbox" /></th><th>Banner Title</th><th>image Preview</th><th>Display Period</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
-            {banners.map((banner, index) => (
-              <tr key={index}><td><input type="checkbox" className="table-checkbox" /></td><td>{banner.title}</td><td><img src={banner.img} alt="Preview" className="banner-preview-img" /></td><td>{banner.period}</td><td><span className={`status-badge ${banner.status.toLowerCase()}`}>{banner.status}</span></td><td><div className="action-links"><span className="edit-link">Edit</span><span className="delete-link">Delete</span></div></td></tr>
-            ))}
+            {banners.map((banner, index) => (<tr key={index}><td><input type="checkbox" className="table-checkbox" /></td><td>{banner.title}</td><td><img src={banner.img} alt="Preview" className="banner-preview-img" /></td><td>{banner.period}</td><td><span className={`status-badge ${banner.status.toLowerCase()}`}>{banner.status}</span></td><td><div className="action-links"><span className="edit-link">Edit</span><span className="delete-link">Delete</span></div></td></tr>))}
           </tbody>
         </table>
         <div className="pagination"><button className="page-btn"><ChevronLeft size={14} /></button><button className="page-btn active">1</button><button className="page-btn">2</button><button className="page-btn">3</button><button className="page-btn"><ChevronRight size={14} /></button></div>
@@ -272,9 +250,7 @@ const AdminDashboard = () => {
           <div className="chart-placeholder">
             <svg className="area-chart-svg" viewBox="0 0 400 150">
               <defs><linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#8D6E63" stopOpacity="0.5" /><stop offset="100%" stopColor="#8D6E63" stopOpacity="0" /></linearGradient></defs>
-              <path d="M0,120 Q30,90 60,110 T120,70 T180,100 T240,60 T300,110 T400,90 L400,150 L0,150 Z" fill="url(#gradient2)" />
-              <path d="M0,120 Q30,90 60,110 T120,70 T180,100 T240,60 T300,110 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" />
-              <text x="0" y="145" fontSize="10" fill="#666">Jan</text><text x="80" y="145" fontSize="10" fill="#666">Feb</text><text x="160" y="145" fontSize="10" fill="#666">Mar</text><text x="240" y="145" fontSize="10" fill="#666">Apr</text><text x="320" y="145" fontSize="10" fill="#666">May</text><text x="380" y="145" fontSize="10" fill="#666">Jun</text>
+              <path d="M0,120 Q30,90 60,110 T120,70 T180,100 T240,60 T300,110 T400,90 L400,150 L0,150 Z" fill="url(#gradient2)" /><path d="M0,120 Q30,90 60,110 T120,70 T180,100 T240,60 T300,110 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" /><text x="0" y="145" fontSize="10" fill="#666">Jan</text><text x="80" y="145" fontSize="10" fill="#666">Feb</text><text x="160" y="145" fontSize="10" fill="#666">Mar</text><text x="240" y="145" fontSize="10" fill="#666">Apr</text><text x="320" y="145" fontSize="10" fill="#666">May</text><text x="380" y="145" fontSize="10" fill="#666">Jun</text>
             </svg>
           </div>
         </div>
@@ -325,21 +301,14 @@ const AdminDashboard = () => {
           <div className="chart-placeholder">
             <svg className="area-chart-svg" viewBox="0 0 400 150">
               <defs><linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#8D6E63" stopOpacity="0.5" /><stop offset="100%" stopColor="#8D6E63" stopOpacity="0" /></linearGradient></defs>
-              <path d="M0,120 Q40,100 80,110 T160,80 T240,100 T320,70 T400,90 L400,150 L0,150 Z" fill="url(#gradient3)" />
-              <path d="M0,120 Q40,100 80,110 T160,80 T240,100 T320,70 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" />
-              <text x="0" y="145" fontSize="10" fill="#666">Jan</text><text x="80" y="145" fontSize="10" fill="#666">Feb</text><text x="160" y="145" fontSize="10" fill="#666">Mar</text><text x="240" y="145" fontSize="10" fill="#666">Apr</text><text x="320" y="145" fontSize="10" fill="#666">May</text><text x="380" y="145" fontSize="10" fill="#666">Jun</text>
+              <path d="M0,120 Q40,100 80,110 T160,80 T240,100 T320,70 T400,90 L400,150 L0,150 Z" fill="url(#gradient3)" /><path d="M0,120 Q40,100 80,110 T160,80 T240,100 T320,70 T400,90" fill="none" stroke="#8D6E63" strokeWidth="2" /><text x="0" y="145" fontSize="10" fill="#666">Jan</text><text x="80" y="145" fontSize="10" fill="#666">Feb</text><text x="160" y="145" fontSize="10" fill="#666">Mar</text><text x="240" y="145" fontSize="10" fill="#666">Apr</text><text x="320" y="145" fontSize="10" fill="#666">May</text><text x="380" y="145" fontSize="10" fill="#666">Jun</text>
             </svg>
           </div>
         </div>
         <div className="chart-card">
           <div className="chart-header"><h4>Popular Variations</h4></div>
           <div className="variations-list">
-            {variations.map((v, i) => (
-              <div className="variation-item" key={i}>
-                <div className="variation-info"><h5>{v.name}</h5><p>{v.sold}</p></div>
-                <div className="variation-revenue">{v.revenue}</div>
-              </div>
-            ))}
+            {variations.map((v, i) => (<div className="variation-item" key={i}><div className="variation-info"><h5>{v.name}</h5><p>{v.sold}</p></div><div className="variation-revenue">{v.revenue}</div></div>))}
           </div>
         </div>
       </section>
@@ -348,9 +317,60 @@ const AdminDashboard = () => {
         <table>
           <thead><tr><th>Product</th><th>Units Sold</th><th>Orders</th><th>Net Sales</th><th>Category</th></tr></thead>
           <tbody>
-            {productPerformance.map((p, i) => (
-              <tr key={i}><td>{p.name}</td><td>{p.sold}</td><td>{p.orders}</td><td>{p.revenue}</td><td>{p.category}</td></tr>
+            {productPerformance.map((p, i) => (<tr key={i}><td>{p.name}</td><td>{p.sold}</td><td>{p.orders}</td><td>{p.revenue}</td><td>{p.category}</td></tr>))}
+          </tbody>
+        </table>
+      </section>
+    </>
+  );
+
+  const renderSellerRevenueView = () => (
+    <>
+      <section className="stats-grid">
+        <div className="stat-card"><div className="stat-title">Total Seller Revenue</div><div className="stat-value">LKR 49, 870</div><div className="stat-change positive">+15.2%</div></div>
+        <div className="stat-card"><div className="stat-title">Net Revenue (Payout)</div><div className="stat-value">LKR 8, 389.50</div><div className="stat-change positive">+10%</div></div>
+        <div className="stat-card"><div className="stat-title">Total Orders</div><div className="stat-value">952</div><div className="stat-change positive">+17.9%</div></div>
+        <div className="stat-card"><div className="stat-title">Avg. Sale Value</div><div className="stat-value">LKR 125, 000</div><div className="stat-change positive">+2.1%</div></div>
+      </section>
+      <section className="charts-grid">
+        <div className="chart-card">
+          <div className="chart-header"><h4>Top Sellers by Revenue</h4></div>
+          <div className="seller-bar-chart">
+            {topSellers.map((s, i) => (
+              <div className="seller-bar-item" key={i}>
+                <div className="seller-bar-label"><span>{s.name}</span><span>{s.revenue}</span></div>
+                <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${s.percent}%` }}>{s.name}</div><div className="progress-bar-value">{s.revenue}</div></div>
+              </div>
             ))}
+          </div>
+        </div>
+        <div className="chart-card">
+          <div className="chart-header"><h4>Revenue Distribution</h4></div>
+          <div className="donut-chart-container">
+            <div style={{ position: 'relative' }}>
+              <svg className="donut-svg" viewBox="0 0 42 42">
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F1E6DA" strokeWidth="3"></circle>
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8D6E63" strokeWidth="3" strokeDasharray="46 54" strokeDashoffset="0"></circle>
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#A1887F" strokeWidth="3" strokeDasharray="30 70" strokeDashoffset="-46"></circle>
+                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#FFCCBC" strokeWidth="3" strokeDasharray="20 80" strokeDashoffset="-76"></circle>
+              </svg>
+              <div className="donut-center-text"><span className="value" style={{ fontSize: '14px' }}>LKR 49,870</span><span className="label">Total Revenue</span></div>
+            </div>
+            <div className="donut-legend">
+              <div className="legend-item"><div className="legend-label"><div className="legend-dot" style={{ backgroundColor: '#8D6E63' }}></div>Silk Waves</div><span className="legend-value">46%</span></div>
+              <div className="legend-item"><div className="legend-label"><div className="legend-dot" style={{ backgroundColor: '#A1887F' }}></div>Crafty Hands</div><span className="legend-value">30%</span></div>
+              <div className="legend-item"><div className="legend-label"><div className="legend-dot" style={{ backgroundColor: '#FFCCBC' }}></div>Ceylon Pottery</div><span className="legend-value">20%</span></div>
+              <div className="legend-item"><div className="legend-label"><div className="legend-dot" style={{ backgroundColor: '#F1E6DA' }}></div>Others</div><span className="legend-value">10%</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="product-table-card">
+        <h3>Seller Performance Details</h3>
+        <table>
+          <thead><tr><th>Seller</th><th>Total Revenue</th><th>Net Revenue</th><th>Orders</th><th>Avg. Sale Value</th></tr></thead>
+          <tbody>
+            {sellerPerformance.map((p, i) => (<tr key={i}><td>{p.name}</td><td>{p.total}</td><td>{p.net}</td><td>{p.orders}</td><td>{p.avg}</td></tr>))}
           </tbody>
         </table>
       </section>
@@ -363,10 +383,10 @@ const AdminDashboard = () => {
       <div className="refund-tabs">
         <div className={`refund-tab ${analyticsSubTab === 'Sales Overview' ? 'active' : ''}`} onClick={() => setAnalyticsSubTab('Sales Overview')}>Sales Overview</div>
         <div className={`refund-tab ${analyticsSubTab === 'Product Sales' ? 'active' : ''}`} style={{ color: analyticsSubTab === 'Product Sales' ? '#FF9800' : '' }} onClick={() => setAnalyticsSubTab('Product Sales')}>Product Sales</div>
-        <div className={`refund-tab ${analyticsSubTab === 'Seller Revenue' ? 'active' : ''}`} onClick={() => setAnalyticsSubTab('Seller Revenue')}>Seller Revenue</div>
+        <div className={`refund-tab ${analyticsSubTab === 'Seller Revenue' ? 'active' : ''}`} style={{ color: analyticsSubTab === 'Seller Revenue' ? '#FF9800' : '' }} onClick={() => setAnalyticsSubTab('Seller Revenue')}>Seller Revenue</div>
       </div>
       <div className="time-filters">{['Today', 'Last 7 Days', 'This Month', 'This Year'].map(pill => (<div key={pill} className={`time-filter-pill ${timePeriod === pill ? 'active' : ''}`} onClick={() => setTimePeriod(pill)}>{pill}</div>))}</div>
-      {analyticsSubTab === 'Product Sales' ? renderProductSalesView() : renderSalesOverview()}
+      {analyticsSubTab === 'Seller Revenue' ? renderSellerRevenueView() : analyticsSubTab === 'Product Sales' ? renderProductSalesView() : renderSalesOverview()}
     </div>
   );
 
