@@ -82,6 +82,13 @@ const AdminDashboard = () => {
     { id: '#1234', product: 'Hand -Painted Ceramic Vase', customer: 'Ayodya Senavirathne', amount: 'LKR 25,000', time: 'Today' },
   ];
 
+  const disputes = [
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Pending' },
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Escalated' },
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Resolved' },
+    { id: '#1234', reason: 'Item not as described', item: 'Hand -Painted Ceramic Vase', buyer: 'Anura Perera', status: 'Pending' },
+  ];
+
   const productPerformance = [
     { name: 'Batik Sarees', sold: 350, orders: 120, revenue: 'LKR 42,000', category: 'Apparel' },
     { name: 'Wooden Elephants', sold: 280, orders: 95, revenue: 'LKR 42,000', category: 'Decor' },
@@ -401,6 +408,46 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const renderDisputeResolution = () => (
+    <div className="dispute-resolution-view">
+      <div className="admin-view-header">
+        <h2>Refund Workflow Management</h2>
+      </div>
+
+      <div className="filters-bar" style={{ justifyContent: 'flex-end', gap: '15px' }}>
+        <select className="filter-select"><option>Filter by Status</option></select>
+        <select className="filter-select"><option>All Sellers</option></select>
+      </div>
+
+      <div className="filters-bar" style={{ marginTop: '10px' }}>
+        <div className="search-bar-container" style={{ maxWidth: 'none' }}>
+          <Search size={18} />
+          <input type="text" placeholder="Search by order ID, Customer Name, ......" />
+        </div>
+      </div>
+
+      <div className="refund-card-grid" style={{ marginTop: '20px' }}>
+        {disputes.map((dispute, index) => (
+          <div className="dispute-card" key={index}>
+            <h4>Dispute {dispute.id} -</h4>
+            <p className="dispute-reason">{dispute.reason}</p>
+            <div className="dispute-info">
+              <span>Item: {dispute.item}</span>
+              <span>Buyer: {dispute.buyer}</span>
+            </div>
+            <div className="dispute-footer">
+              <span className={`status-badge ${dispute.status.toLowerCase()}`}>{dispute.status}</span>
+              <div className="view-details-link">
+                <Eye size={14} />
+                <span>View Details</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderSystemSettings = () => (
     <div className="system-settings-view">
       <div className="admin-view-header"><h2>System Settings</h2></div>
@@ -421,6 +468,7 @@ const AdminDashboard = () => {
       case 'Content Management': return renderContentManagement();
       case 'Sales & Analytics': return renderSalesAnalytics();
       case 'Refund Workflow': return renderRefundWorkflow();
+      case 'Dispute Resolution': return renderDisputeResolution();
       case 'System Settings': return renderSystemSettings();
       default: return renderDashboard();
     }
