@@ -40,7 +40,7 @@ import bannerSale from '../../assets/banner_sale.png';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('Dashboard');
-  const [refundSubTab, setRefundSubTab] = useState('New Requests (2)');
+  const [refundSubTab, setRefundSubTab] = useState('New');
   const [analyticsSubTab, setAnalyticsSubTab] = useState('Sales Overview');
   const [timePeriod, setTimePeriod] = useState('Today');
   const [selectedDispute, setSelectedDispute] = useState(null);
@@ -172,6 +172,59 @@ const AdminDashboard = () => {
       return date.getFullYear() === now.getFullYear();
     }
     return true;
+  };
+
+  const isDateInPreviousPeriod = (dateString) => {
+    if (!dateString) return false;
+    const parts = dateString.split('-');
+    let date;
+    if (parts.length === 3) {
+      date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    } else {
+      date = new Date(dateString);
+    }
+    const now = new Date();
+
+    if (timePeriod === 'Today') {
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+      return date.toDateString() === yesterday.toDateString();
+    } else if (timePeriod === 'Last 7 Days') {
+      const diff = (now - date) / (1000 * 60 * 60 * 24);
+      return diff > 7 && diff <= 14;
+    } else if (timePeriod === 'This Month') {
+      let prevMonth = now.getMonth() - 1;
+      let prevYear = now.getFullYear();
+      if (prevMonth < 0) {
+        prevMonth = 11;
+        prevYear -= 1;
+      }
+      return date.getMonth() === prevMonth && date.getFullYear() === prevYear;
+    } else if (timePeriod === 'This Year') {
+      return date.getFullYear() === now.getFullYear() - 1;
+    }
+    return false;
+  };
+
+  const calculateChange = (current, previous) => {
+    if (previous === 0) {
+      return current > 0 ? 100 : 0;
+    }
+    const change = ((current - previous) / previous) * 100;
+    return parseFloat(change.toFixed(1));
+  };
+
+  const renderTrend = (changeValue) => {
+    const isPositive = changeValue >= 0;
+    const formatted = isPositive ? `+${changeValue}%` : `${changeValue}%`;
+    return (
+      <div 
+        className={`stat-change ${isPositive ? 'positive' : ''}`} 
+        style={!isPositive ? { color: '#F44336' } : {}}
+      >
+        {formatted}
+      </div>
+    );
   };
 
   const fetchOrders = async () => {
@@ -1191,11 +1244,15 @@ const AdminDashboard = () => {
 
 
   const getProductForOrder = (order) => {
+    const dbProduct = productsList.find(p => p.sellerName === order.sellerName);
+    if (dbProduct) {
+      return { name: dbProduct.name, category: dbProduct.category };
+    }
     if (order.sellerName === 'Silk Waves') {
       return { name: 'Batik Print Silk Saree', category: 'Clothing' };
     } else if (order.sellerName === 'Wood Art') {
       return { name: 'Carved Wooden Elephant', category: 'Art' };
-    } else if (order.sellerName === 'Crafty Hand' || order.sellerName === 'Crafty Hands') {
+    } else if (order.sellerName === 'Crafty Hand' || order.sellerName === 'Crafty Hands' || order.sellerName === 'Artisan Craft') {
       return { name: 'Hand-painted Ceramic Vase', category: 'Pottery' };
     } else {
       return { name: 'Handwoven Reed Basket', category: 'Home' };
@@ -1300,6 +1357,19 @@ const AdminDashboard = () => {
       { label: 'Home', value: 1 }
     ];
     const finalTopCategories = dynamicTopCategories.length > 0 ? dynamicTopCategories : fallbackTopCategories;
+    const previousOrders = ordersList.filter(o => isDateInPreviousPeriod(o.date));
+    const previousUsers = usersList.filter(u => isDateInPreviousPeriod(u.registrationDate));
+
+    const prevTotalRevenue = previousOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const prevNumberOfOrders = previousOrders.length;
+    const prevAvgOrderValue = prevNumberOfOrders > 0 ? (prevTotalRevenue / prevNumberOfOrders) : 0;
+    const prevNewCustomers = previousUsers.length;
+
+    const revenueChange = calculateChange(totalRevenue, prevTotalRevenue);
+    const ordersChange = calculateChange(numberOfOrders, prevNumberOfOrders);
+    const aovChange = calculateChange(avgOrderValue, prevAvgOrderValue);
+    const customersChange = calculateChange(newCustomers, prevNewCustomers);
+
     return { 
       totalRevenue, 
       numberOfOrders, 
@@ -1309,7 +1379,11 @@ const AdminDashboard = () => {
       chartPoints,
       linePath,
       areaPath,
-      finalTopCategories
+      finalTopCategories,
+      revenueChange,
+      ordersChange,
+      aovChange,
+      customersChange
     };
   };
 
@@ -1323,7 +1397,11 @@ const AdminDashboard = () => {
       chartPoints,
       linePath,
       areaPath,
-      finalTopCategories
+      finalTopCategories,
+      revenueChange,
+      ordersChange,
+      aovChange,
+      customersChange
     } = calculateSalesOverview();
 
     const formatCurrency = (amount) => `LKR ${amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -1353,10 +1431,10 @@ const AdminDashboard = () => {
     return (
       <>
         <section className="stats-grid">
-          <div className="stat-card"><div className="stat-title">Total Revenue</div><div className="stat-value">{formatCurrency(totalRevenue)}</div><div className="stat-change positive">+5.2%</div></div>
-          <div className="stat-card"><div className="stat-title">Number of Orders</div><div className="stat-value">{numberOfOrders}</div><div className="stat-change positive">+10%</div></div>
-          <div className="stat-card"><div className="stat-title">Average Order Value</div><div className="stat-value">{formatCurrency(avgOrderValue)}</div><div className="stat-change" style={{ color: '#F44336' }}>-1.5%</div></div>
-          <div className="stat-card"><div className="stat-title">New Customers</div><div className="stat-value">{newCustomers}</div><div className="stat-change positive">+20.1%</div></div>
+          <div className="stat-card"><div className="stat-title">Total Revenue</div><div className="stat-value">{formatCurrency(totalRevenue)}</div>{renderTrend(revenueChange)}</div>
+          <div className="stat-card"><div className="stat-title">Number of Orders</div><div className="stat-value">{numberOfOrders}</div>{renderTrend(ordersChange)}</div>
+          <div className="stat-card"><div className="stat-title">Average Order Value</div><div className="stat-value">{formatCurrency(avgOrderValue)}</div>{renderTrend(aovChange)}</div>
+          <div className="stat-card"><div className="stat-title">New Customers</div><div className="stat-value">{newCustomers}</div>{renderTrend(customersChange)}</div>
         </section>
       <section className="charts-grid">
         <div className="chart-card">
@@ -1472,6 +1550,17 @@ const AdminDashboard = () => {
     const netSales = filteredOrders.filter(o => o.orderStatus === 'Completed' || o.paymentStatus === 'Paid').reduce((sum, o) => sum + o.amount, 0);
     const productAOV = filteredOrders.length > 0 ? (grossSales / filteredOrders.length) : 0;
 
+    const previousOrders = ordersList.filter(o => isDateInPreviousPeriod(o.date));
+    const prevGrossSales = previousOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const prevUnitsSold = previousOrders.reduce((sum, o) => sum + (o.amount > 30000 ? 3 : o.amount > 15000 ? 2 : 1), 0);
+    const prevNetSales = previousOrders.filter(o => o.orderStatus === 'Completed' || o.paymentStatus === 'Paid').reduce((sum, o) => sum + o.amount, 0);
+    const prevProductAOV = previousOrders.length > 0 ? (prevGrossSales / previousOrders.length) : 0;
+
+    const unitsChange = calculateChange(unitsSold, prevUnitsSold);
+    const grossChange = calculateChange(grossSales, prevGrossSales);
+    const netChange = calculateChange(netSales, prevNetSales);
+    const aovChange = calculateChange(productAOV, prevProductAOV);
+
     const formatCurrency = (amount) => `LKR ${amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
     // Build dynamic product performance
@@ -1528,10 +1617,10 @@ const AdminDashboard = () => {
     return (
       <>
         <section className="stats-grid">
-          <div className="stat-card"><div className="stat-title">Units Sold</div><div className="stat-value">{unitsSold}</div><div className="stat-change positive">+15.2%</div></div>
-          <div className="stat-card"><div className="stat-title">Gross Sales</div><div className="stat-value">{formatCurrency(grossSales)}</div><div className="stat-change positive">+10%</div></div>
-          <div className="stat-card"><div className="stat-title">Net Sales</div><div className="stat-value">{formatCurrency(netSales)}</div><div className="stat-change positive">+12.9%</div></div>
-          <div className="stat-card"><div className="stat-title">Product AOV</div><div className="stat-value">{formatCurrency(productAOV)}</div><div className="stat-change" style={{ color: '#F44336' }}>-0.8%</div></div>
+          <div className="stat-card"><div className="stat-title">Units Sold</div><div className="stat-value">{unitsSold}</div>{renderTrend(unitsChange)}</div>
+          <div className="stat-card"><div className="stat-title">Gross Sales</div><div className="stat-value">{formatCurrency(grossSales)}</div>{renderTrend(grossChange)}</div>
+          <div className="stat-card"><div className="stat-title">Net Sales</div><div className="stat-value">{formatCurrency(netSales)}</div>{renderTrend(netChange)}</div>
+          <div className="stat-card"><div className="stat-title">Product AOV</div><div className="stat-value">{formatCurrency(productAOV)}</div>{renderTrend(aovChange)}</div>
         </section>
         <section className="charts-grid">
           <div className="chart-card">
@@ -1587,8 +1676,23 @@ const AdminDashboard = () => {
     const totalOrders = filteredOrders.length;
     const avgSaleValue = totalOrders > 0 ? (totalSellerRevenue / totalOrders) : 0;
 
-    // Group by seller
+    const previousOrders = ordersList.filter(o => isDateInPreviousPeriod(o.date));
+    const prevTotalSellerRevenue = previousOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const prevNetPayout = prevTotalSellerRevenue * 0.85;
+    const prevTotalOrders = previousOrders.length;
+    const prevAvgSaleValue = prevTotalOrders > 0 ? (prevTotalSellerRevenue / prevTotalOrders) : 0;
+
+    const sellerRevChange = calculateChange(totalSellerRevenue, prevTotalSellerRevenue);
+    const netPayoutChange = calculateChange(netPayout, prevNetPayout);
+    const sellerOrdersChange = calculateChange(totalOrders, prevTotalOrders);
+    const avgSaleChange = calculateChange(avgSaleValue, prevAvgSaleValue);
+
+    // Group by seller using database sellersList as base
     const sellerMap = {};
+    sellersList.forEach(s => {
+      sellerMap[s.name] = { name: s.name, revenue: 0, orders: 0 };
+    });
+
     filteredOrders.forEach(o => {
       const name = o.sellerName || 'Other Seller';
       if (!sellerMap[name]) {
@@ -1616,7 +1720,8 @@ const AdminDashboard = () => {
       { name: 'Wood Art', revenue: 'LKR 42,550', percent: 55 },
       { name: 'Batik LK', revenue: 'LKR 42,550', percent: 50 },
     ];
-    const finalTopSellers = dynamicTopSellers.length > 0 ? dynamicTopSellers : fallbackTopSellers;
+    const isInitialLoading = sellersList.length === 0 && ordersList.length === 0;
+    const finalTopSellers = isInitialLoading ? fallbackTopSellers : dynamicTopSellers;
 
     // Donut Segments for Seller Payout Distribution
     const colors = ['#8D6E63', '#A1887F', '#FFCCBC', '#F1E6DA', '#D7CCC8'];
@@ -1638,7 +1743,7 @@ const AdminDashboard = () => {
         total: `LKR ${s.revenue.toLocaleString()}`,
         net: `LKR ${(s.revenue * 0.85).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
         orders: s.orders,
-        avg: `LKR ${(s.revenue / s.orders).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+        avg: `LKR ${(s.orders > 0 ? Math.round(s.revenue / s.orders) : 0).toLocaleString()}`
       }))
       .sort((a, b) => parseFloat(b.total.replace(/[^0-9.-]+/g,"")) - parseFloat(a.total.replace(/[^0-9.-]+/g,"")));
 
@@ -1648,15 +1753,15 @@ const AdminDashboard = () => {
       { name: 'Ceylon Pottery', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
       { name: 'Wood Art', total: 'LKR 42,000', net: 'LKR 42,000', orders: 215, avg: 'LKR 42,000' },
     ];
-    const finalSellerPerformance = dynamicSellerPerformance.length > 0 ? dynamicSellerPerformance : fallbackSellerPerformance;
+    const finalSellerPerformance = isInitialLoading ? fallbackSellerPerformance : dynamicSellerPerformance;
 
     return (
       <>
         <section className="stats-grid">
-          <div className="stat-card"><div className="stat-title">Total Seller Revenue</div><div className="stat-value">{formatCurrency(totalSellerRevenue)}</div><div className="stat-change positive">+15.2%</div></div>
-          <div className="stat-card"><div className="stat-title">Net Revenue (Payout)</div><div className="stat-value">{formatCurrency(netPayout)}</div><div className="stat-change positive">+10%</div></div>
-          <div className="stat-card"><div className="stat-title">Total Orders</div><div className="stat-value">{totalOrders}</div><div className="stat-change positive">+17.9%</div></div>
-          <div className="stat-card"><div className="stat-title">Avg. Sale Value</div><div className="stat-value">{formatCurrency(avgSaleValue)}</div><div className="stat-change positive">+2.1%</div></div>
+          <div className="stat-card"><div className="stat-title">Total Seller Revenue</div><div className="stat-value">{formatCurrency(totalSellerRevenue)}</div>{renderTrend(sellerRevChange)}</div>
+          <div className="stat-card"><div className="stat-title">Net Revenue (Payout)</div><div className="stat-value">{formatCurrency(netPayout)}</div>{renderTrend(netPayoutChange)}</div>
+          <div className="stat-card"><div className="stat-title">Total Orders</div><div className="stat-value">{totalOrders}</div>{renderTrend(sellerOrdersChange)}</div>
+          <div className="stat-card"><div className="stat-title">Avg. Sale Value</div><div className="stat-value">{formatCurrency(avgSaleValue)}</div>{renderTrend(avgSaleChange)}</div>
         </section>
         <section className="charts-grid">
           <div className="chart-card">
@@ -1735,16 +1840,68 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const renderRefundWorkflow = () => (
-    <div className="refund-workflow-view">
-      <div className="admin-view-header"><h2>Refund Workflow Management</h2></div>
-      <div className="filters-bar" style={{ justifyContent: 'space-between' }}><div className="search-bar-container"><Search size={18} /><input type="text" placeholder="Search by order ID, Customer Name, Date....." /></div><select className="filter-select"><option>All Sellers</option></select></div>
-      <div className="refund-tabs">
-        <div className={`refund-tab ${refundSubTab === 'New Requests (2)' ? 'active' : ''}`} onClick={() => setRefundSubTab('New Requests (2)')}>New Requests (2)</div><div className={`refund-tab ${refundSubTab === 'Under Review (4)' ? 'active' : ''}`} onClick={() => setRefundSubTab('Under Review (4)')}>Under Review (4)</div><div className={`refund-tab awaiting ${refundSubTab === 'Awaiting seller Action(1)' ? 'active' : ''}`} onClick={() => setRefundSubTab('Awaiting seller Action(1)')}>Awaiting seller Action(1)</div>
+  const renderRefundWorkflow = () => {
+    const newRequestsCount = refundsList.filter(r => r.status === 'New').length;
+    const underReviewCount = refundsList.filter(r => r.status === 'Under Review').length;
+    const awaitingSellerCount = refundsList.filter(r => r.status === 'Awaiting Seller Action').length;
+
+    const formatRefundTime = (timeStr) => {
+      if (!timeStr) return '';
+      try {
+        const d = new Date(timeStr);
+        if (isNaN(d.getTime())) return timeStr;
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + 
+               d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return timeStr;
+      }
+    };
+
+    return (
+      <div className="refund-workflow-view">
+        <div className="admin-view-header"><h2>Refund Workflow Management</h2></div>
+        <div className="filters-bar" style={{ justifyContent: 'space-between' }}>
+          <div className="search-bar-container">
+            <Search size={18} />
+            <input type="text" placeholder="Search by order ID, Customer Name, Date....." />
+          </div>
+          <select className="filter-select">
+            <option>All Sellers</option>
+          </select>
+        </div>
+        <div className="refund-tabs">
+          <div className={`refund-tab ${refundSubTab === 'New' ? 'active' : ''}`} onClick={() => setRefundSubTab('New')}>
+            New Requests ({newRequestsCount})
+          </div>
+          <div className={`refund-tab ${refundSubTab === 'Under Review' ? 'active' : ''}`} onClick={() => setRefundSubTab('Under Review')}>
+            Under Review ({underReviewCount})
+          </div>
+          <div className={`refund-tab awaiting ${refundSubTab === 'Awaiting Seller Action' ? 'active' : ''}`} onClick={() => setRefundSubTab('Awaiting Seller Action')}>
+            Awaiting seller Action({awaitingSellerCount})
+          </div>
+        </div>
+        <div className="refund-card-grid">
+          {refundsList
+            .filter(r => r.status === refundSubTab)
+            .map((refund, index) => (
+              <div className="refund-card" key={index}>
+                <div className="refund-card-header">
+                  <h4>Order {refund.orderNumber}</h4>
+                  <p>{refund.productName}</p>
+                </div>
+                <div className="refund-card-footer">
+                  <div className="refund-customer-info">
+                    <span className="customer-name">{refund.customerName}</span>
+                    <span className="refund-time">{formatRefundTime(refund.requestTime)}</span>
+                  </div>
+                  <div className="refund-amount">{formatCurrency(refund.amount)}</div>
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
-      <div className="refund-card-grid">{refundsList.map((refund, index) => (<div className="refund-card" key={index}><div className="refund-card-header"><h4>Order {refund.orderNumber}</h4><p>{refund.productName}</p></div><div className="refund-card-footer"><div className="refund-customer-info"><span className="customer-name">{refund.customerName}</span><span className="refund-time">{refund.requestTime}</span></div><div className="refund-amount">{formatCurrency(refund.amount)}</div></div></div>))}</div>
-    </div>
-  );
+    );
+  };
 
   const renderDisputeDetail = () => (
     <div className="dispute-detail-view">
