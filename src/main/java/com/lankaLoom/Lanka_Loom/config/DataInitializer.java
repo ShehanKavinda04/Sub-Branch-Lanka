@@ -98,7 +98,53 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         if (disputeRepository.count() == 0) {
-            disputeRepository.save(Dispute.builder().disputeNumber("#1234").reason("Item not as described").itemName("Hand-Painted Ceramic Vase").buyerName("Ayodya Senavirathne").sellerName("Silk Waves").orderNumber("#ORD1234").status("Pending").outcome("Full Refund").build());
+            disputeRepository.save(Dispute.builder()
+                .disputeNumber("#1234")
+                .reason("Item not as described")
+                .itemName("Hand-Painted Ceramic Vase")
+                .buyerName("Ayodya Senavirathne")
+                .sellerName("Silk Waves")
+                .orderNumber("#ORD1234")
+                .status("Pending")
+                .outcome("Full Refund")
+                .messagesJson("[{\"sender\":\"Ayodya Senavirathne\",\"role\":\"Buyer\",\"time\":\"May 16, 2026, 10:15 AM\",\"content\":\"The ceramic vase arrived with multiple cracks on the side. The packaging was completely torn.\",\"type\":\"buyer\"},{\"sender\":\"Silk Waves\",\"role\":\"Seller\",\"time\":\"May 16, 2026, 2:30 PM\",\"content\":\"We package all items securely in bubble wrap. This damage must have occurred during transit.\",\"type\":\"seller\"},{\"sender\":\"System Auto-Escalation\",\"role\":\"System\",\"time\":\"May 17, 2026, 9:00 AM\",\"content\":\"Dispute auto-escalated to admin review due to seller and buyer disagreement.\",\"type\":\"system\"}]")
+                .build());
+
+            disputeRepository.save(Dispute.builder()
+                .disputeNumber("#5678")
+                .reason("Late delivery and damaged packaging")
+                .itemName("Clay Tea Set")
+                .buyerName("John Doe")
+                .sellerName("Crafty Hand")
+                .orderNumber("#ORD7890")
+                .status("Escalated")
+                .outcome("Replacement")
+                .messagesJson("[{\"sender\":\"John Doe\",\"role\":\"Buyer\",\"time\":\"May 14, 2026, 11:30 AM\",\"content\":\"The Clay Tea Set is missing two of the cups, and one of the saucers is chipped.\",\"type\":\"buyer\"},{\"sender\":\"Crafty Hand\",\"role\":\"Seller\",\"time\":\"May 14, 2026, 4:10 PM\",\"content\":\"I shipped all pieces in perfect condition. Please check if they fell out inside the main box.\",\"type\":\"seller\"},{\"sender\":\"System Auto-Escalation\",\"role\":\"System\",\"time\":\"May 15, 2026, 8:45 AM\",\"content\":\"Dispute auto-escalated to admin review due to seller and buyer disagreement.\",\"type\":\"system\"}]")
+                .build());
+
+            disputeRepository.save(Dispute.builder()
+                .disputeNumber("#9012")
+                .reason("Different size than advertised")
+                .itemName("Carved Wooden Elephant")
+                .buyerName("Jane Smith")
+                .sellerName("Wood Art")
+                .orderNumber("#ORD3456")
+                .status("Resolved")
+                .outcome("Full Refund")
+                .messagesJson("[{\"sender\":\"Jane Smith\",\"role\":\"Buyer\",\"time\":\"May 10, 2026, 3:20 PM\",\"content\":\"The wooden carving is much smaller than the described dimensions. It was supposed to be 12 inches but it is barely 6 inches.\",\"type\":\"buyer\"},{\"sender\":\"Wood Art\",\"role\":\"Seller\",\"time\":\"May 10, 2026, 5:15 PM\",\"content\":\"My apologies. We might have sent the medium size instead of the large size by mistake.\",\"type\":\"seller\"},{\"sender\":\"System Auto-Escalation\",\"role\":\"System\",\"time\":\"May 11, 2026, 10:00 AM\",\"content\":\"Dispute auto-escalated to admin review due to seller and buyer disagreement.\",\"type\":\"system\"}]")
+                .build());
+
+            disputeRepository.save(Dispute.builder()
+                .disputeNumber("#3456")
+                .reason("Incorrect item sent")
+                .itemName("Batik Print Silk Saree")
+                .buyerName("Robert Brown")
+                .sellerName("Silk Waves")
+                .orderNumber("#ORD9012")
+                .status("Resolved")
+                .outcome("Dismissed")
+                .messagesJson("[{\"sender\":\"Robert Brown\",\"role\":\"Buyer\",\"time\":\"May 12, 2026, 9:00 AM\",\"content\":\"The silk saree material feels cheap and synthetic. I believe it is polyester, not authentic silk.\",\"type\":\"buyer\"},{\"sender\":\"Silk Waves\",\"role\":\"Seller\",\"time\":\"May 12, 2026, 1:40 PM\",\"content\":\"All our sarees are made from 100% pure Mulberry silk. We have certified testing reports.\",\"type\":\"seller\"},{\"sender\":\"System Auto-Escalation\",\"role\":\"System\",\"time\":\"May 13, 2026, 11:15 AM\",\"content\":\"Dispute auto-escalated to admin review due to seller and buyer disagreement.\",\"type\":\"system\"}]")
+                .build());
         }
 
         if (userRepository.count() == 0) {

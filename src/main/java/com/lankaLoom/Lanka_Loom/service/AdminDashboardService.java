@@ -18,6 +18,7 @@ public class AdminDashboardService {
     private final DisputeRepository disputeRepository;
     private final UserRepository userRepository;
     private final BannerRepository bannerRepository;
+    private final SystemSettingsRepository systemSettingsRepository;
 
     public DashboardStatsDTO getStats() {
         Double totalSales = orderRepository.findAll().stream().mapToDouble(Order::getAmount).sum();
@@ -176,5 +177,36 @@ public class AdminDashboardService {
         json = json.substring(0, json.length() - 1) + newMsg + "]";
         dispute.setMessagesJson(json);
         return disputeRepository.save(dispute);
+    }
+
+    public SystemSettings getSystemSettings() {
+        return systemSettingsRepository.findAll().stream().findFirst().orElseGet(() -> {
+            SystemSettings defaultSettings = SystemSettings.builder()
+                .siteTitle("Lanka Craft")
+                .tagline("Handmade with love in Sri Lanka")
+                .adminEmail("admin@lankacraft.lk")
+                .logoUrl("")
+                .maintenanceMode(false)
+                .cachingEnabled(true)
+                .defaultCurrency("SL Rupee (LKR)")
+                .defaultLanguage("English")
+                .timeZone("Asia/Colombo (UTC+5.30)")
+                .build();
+            return systemSettingsRepository.save(defaultSettings);
+        });
+    }
+
+    public SystemSettings updateSystemSettings(SystemSettings newSettings) {
+        SystemSettings existing = getSystemSettings();
+        existing.setSiteTitle(newSettings.getSiteTitle());
+        existing.setTagline(newSettings.getTagline());
+        existing.setAdminEmail(newSettings.getAdminEmail());
+        existing.setLogoUrl(newSettings.getLogoUrl());
+        existing.setMaintenanceMode(newSettings.isMaintenanceMode());
+        existing.setCachingEnabled(newSettings.isCachingEnabled());
+        existing.setDefaultCurrency(newSettings.getDefaultCurrency());
+        existing.setDefaultLanguage(newSettings.getDefaultLanguage());
+        existing.setTimeZone(newSettings.getTimeZone());
+        return systemSettingsRepository.save(existing);
     }
 }

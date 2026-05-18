@@ -127,4 +127,14 @@ public class AdminDashboardController {
         String cleanContent = content.replace("\"", "");
         return adminDashboardService.addDisputeMessage(id, cleanContent);
     }
+
+    @GetMapping("/settings")
+    public SystemSettings getSettings() {
+        return adminDashboardService.getSystemSettings();
+    }
+
+    @PutMapping("/settings")
+    public SystemSettings updateSettings(@RequestBody SystemSettings settings) {
+        return adminDashboardService.updateSystemSettings(settings);
+    }
 }
