@@ -7,7 +7,7 @@ import Footer from "../../components/Footer/Footer";
 import "./CartPage.css";
 
 const Cart = () => {
-  // useCart එකෙන් removeItem function එකත් ගන්න (එය context එකේ තියෙන බවට තහවුරු කරගන්න)
+  
   const { cartItems, removeFromCart } = useCart(); 
   const navigate = useNavigate();
 
