@@ -30,6 +30,8 @@ import {
   Video
 } from 'lucide-react';
 import './AdminDashboard.css';
+import { useNavigate } from 'react-router-dom';
+
 import Swal from 'sweetalert2';
 import adminAvatar from '../../assets/admin_avatar.png';
 import vaseImg from '../../assets/vases.png';
@@ -40,6 +42,7 @@ import avatarMale2 from '../../assets/avatar_male_2.png';
 import bannerSale from '../../assets/banner_sale.png';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [refundSubTab, setRefundSubTab] = useState('New');
   const [refundSearch, setRefundSearch] = useState('');
@@ -127,8 +130,11 @@ const AdminDashboard = () => {
   const [orderStatusFilter, setOrderStatusFilter] = useState('All Status');
   const [orderSellerFilter, setOrderSellerFilter] = useState('All Sellers');
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('All Payment Status');
-  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [newOrderForm, setNewOrderForm] = useState({ buyerName: '', sellerName: '', amount: '' });
+  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isHeaderSearchOpen, setIsHeaderSearchOpen] = useState(false);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
   const [systemSettings, setSystemSettings] = useState({
     siteTitle: 'Lanka Craft',
     tagline: 'Handmade with love in Sri Lanka',
@@ -380,14 +386,14 @@ const AdminDashboard = () => {
   const renderDashboard = () => (
     <>
       <section className="stats-grid">
-        <div className="stat-card"><div className="stat-title">Total Sales</div><div className="stat-value">{formatCurrency(stats.totalSales)}</div><div className="stat-change positive">+{stats.salesChange}% this month</div></div>
-        <div className="stat-card"><div className="stat-title">New Orders</div><div className="stat-value">{stats.newOrders}</div><div className="stat-change positive">+{stats.ordersChange}%</div></div>
-        <div className="stat-card"><div className="stat-title">New Sellers</div><div className="stat-value">{stats.newSellers}</div><div className="stat-change positive">+{stats.sellersChange}%</div></div>
-        <div className="stat-card"><div className="stat-title">Pending Products</div><div className="stat-value">{stats.pendingProducts}</div><div className="stat-change">+{stats.productsChange}%</div></div>
+        <div className="stat-card"><div className="stat-title">{translate('Total Sales')}</div><div className="stat-value">{formatCurrency(stats.totalSales)}</div><div className="stat-change positive">+{stats.salesChange}% this month</div></div>
+        <div className="stat-card"><div className="stat-title">{translate('New Orders')}</div><div className="stat-value">{stats.newOrders}</div><div className="stat-change positive">+{stats.ordersChange}%</div></div>
+        <div className="stat-card"><div className="stat-title">{translate('New Sellers')}</div><div className="stat-value">{stats.newSellers}</div><div className="stat-change positive">+{stats.sellersChange}%</div></div>
+        <div className="stat-card"><div className="stat-title">{translate('Pending Products')}</div><div className="stat-value">{stats.pendingProducts}</div><div className="stat-change">+{stats.productsChange}%</div></div>
       </section>
       <section className="charts-grid">
         <div className="chart-card">
-          <div className="chart-header"><div className="chart-title"><h4>Sales Over Time</h4><div className="chart-subtitle">{formatCurrency(stats.totalSales)}</div><div className="stat-change positive">this month +{stats.salesChange}%</div></div></div>
+          <div className="chart-header"><div className="chart-title"><h4>{translate('Sales Over Time')}</h4><div className="chart-subtitle">{formatCurrency(stats.totalSales)}</div><div className="stat-change positive">this month +{stats.salesChange}%</div></div></div>
           <div className="chart-placeholder">
             <svg className="area-chart-svg" viewBox="0 0 400 150">
               <defs><linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#8D6E63" stopOpacity="0.5" /><stop offset="100%" stopColor="#8D6E63" stopOpacity="0" /></linearGradient></defs>
@@ -408,7 +414,7 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className="chart-card">
-          <div className="chart-header"><div className="chart-title"><h4>Top Categories</h4><div className="chart-subtitle">{topCategories.reduce((sum, cat) => sum + cat.value, 0)} Items</div><div className="stat-change positive">this month +{stats.productsChange || 8}%</div></div></div>
+          <div className="chart-header"><div className="chart-title"><h4>{translate('Top Categories')}</h4><div className="chart-subtitle">{topCategories.reduce((sum, cat) => sum + cat.value, 0)} Items</div><div className="stat-change positive">this month +{stats.productsChange || 8}%</div></div></div>
           <div className="chart-placeholder">
             {topCategories.length > 0 ? (
               topCategories.map((cat, i) => (
@@ -2946,14 +2952,14 @@ const AdminDashboard = () => {
 
     return (
       <div className="system-settings-view">
-        <div className="admin-view-header"><h2>System Settings</h2></div>
+        <div className="admin-view-header"><h2>{translate('System Settings')}</h2></div>
         <div className="settings-container">
           {/* Site Information */}
           <div className="settings-card">
-            <div className="settings-card-header"><h3>Site Information</h3></div>
+            <div className="settings-card-header"><h3>{translate('General Settings')}</h3></div>
             <div className="settings-card-body">
               <div className="settings-group">
-                <label>Site Title</label>
+                <label>{translate('Site Title')}</label>
                 <input 
                   type="text" 
                   className="settings-input" 
@@ -2962,7 +2968,7 @@ const AdminDashboard = () => {
                 />
               </div>
               <div className="settings-group">
-                <label>Tagline</label>
+                <label>{translate('Tagline')}</label>
                 <input 
                   type="text" 
                   className="settings-input" 
@@ -2971,7 +2977,7 @@ const AdminDashboard = () => {
                 />
               </div>
               <div className="settings-group">
-                <label>Admin Email Address</label>
+                <label>{translate('Admin Email')}</label>
                 <input 
                   type="email" 
                   className="settings-input" 
@@ -3034,7 +3040,7 @@ const AdminDashboard = () => {
                     }
                   }}
                 >
-                  Save Site Info
+                  {translate('Save System Settings')}
                 </button>
               </div>
             </div>
@@ -3042,11 +3048,11 @@ const AdminDashboard = () => {
 
           {/* Maintenance & Performance */}
           <div className="settings-card">
-            <div className="settings-card-header"><h3>Maintenance & Performance</h3></div>
+            <div className="settings-card-header"><h3>{translate('System Settings')}</h3></div>
             <div className="settings-card-body">
               <div className="settings-toggle-row">
                 <div className="toggle-info">
-                  <h4>Enable Maintenance Mode</h4>
+                  <h4>{translate('Maintenance Mode')}</h4>
                   <p>Puts the storefront in maintenance mode. Admins can still access the site.</p>
                 </div>
                 <label className="switch">
@@ -3060,7 +3066,7 @@ const AdminDashboard = () => {
               </div>
               <div className="settings-toggle-row">
                 <div className="toggle-info">
-                  <h4>Enable Caching</h4>
+                  <h4>{translate('Caching Status')}</h4>
                   <p>Improves site performance by caching pages. Recommended for production.</p>
                 </div>
                 <label className="switch">
@@ -3077,11 +3083,11 @@ const AdminDashboard = () => {
 
           {/* Localization */}
           <div className="settings-card">
-            <div className="settings-card-header"><h3>Localization</h3></div>
+            <div className="settings-card-header"><h3>{translate('System & Localization')}</h3></div>
             <div className="settings-card-body">
               <div className="localization-grid">
                 <div className="settings-group">
-                  <label>Default Currency</label>
+                  <label>{translate('Default Currency')}</label>
                   <select 
                     className="settings-input"
                     value={systemSettings.defaultCurrency || 'SL Rupee (LKR)'}
@@ -3093,7 +3099,7 @@ const AdminDashboard = () => {
                   </select>
                 </div>
                 <div className="settings-group">
-                  <label>Default Language</label>
+                  <label>{translate('Default Language')}</label>
                   <select 
                     className="settings-input"
                     value={systemSettings.defaultLanguage || 'English'}
@@ -3106,7 +3112,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="settings-group">
-                <label>Time Zone</label>
+                <label>{translate('Time Zone')}</label>
                 <select 
                   className="settings-input"
                   value={systemSettings.timeZone || 'Asia/Colombo (UTC+5.30)'}
@@ -3124,6 +3130,220 @@ const AdminDashboard = () => {
     );
   };
 
+  const getNotifications = () => {
+    const notifications = [];
+    
+    // 1. Pending Products
+    const pendingProducts = productsList.filter(p => p.status === 'Pending');
+    pendingProducts.forEach(p => {
+      notifications.push({
+        id: `prod-${p.id}`,
+        title: 'Product Pending',
+        desc: `"${p.name}" requires admin review.`,
+        time: 'Pending',
+        targetTab: 'Product Approval'
+      });
+    });
+
+    // 2. Escalated Disputes
+    const escalatedDisputes = disputesList.filter(d => d.status === 'Escalated');
+    escalatedDisputes.forEach(d => {
+      notifications.push({
+        id: `disp-${d.id}`,
+        title: 'Dispute Escalated',
+        desc: `Dispute #${d.disputeNumber} requires immediate action.`,
+        time: 'Urgent',
+        targetTab: 'Dispute Resolution'
+      });
+    });
+
+    // 3. Pending Refunds
+    const pendingRefunds = refundsList.filter(r => r.status === 'Pending' || r.status === 'Processing');
+    pendingRefunds.forEach(r => {
+      notifications.push({
+        id: `ref-${r.id}`,
+        title: 'Refund Requested',
+        desc: `LKR ${r.amount?.toLocaleString()} for Order #${r.orderNumber}.`,
+        time: r.status || 'Active',
+        targetTab: 'Refund Workflow'
+      });
+    });
+
+    return notifications;
+  };
+
+  const translate = (text) => {
+    const lang = systemSettings.defaultLanguage || 'English';
+    if (lang === 'English') return text;
+    
+    const dict = {
+      // Sidebar Navigation
+      'Dashboard': {
+        'Sinhala': 'පාලන පුවරුව',
+        'Tamil': 'டாஷ்போர்டு'
+      },
+      'User Management': {
+        'Sinhala': 'පරිශීලක කළමනාකරණය',
+        'Tamil': 'பயனர் மேலாண்மை'
+      },
+      'Seller Management': {
+        'Sinhala': 'විකුණුම්කරුවන්ගේ කළමනාකරණය',
+        'Tamil': 'விற்பனையாளர் மேலாண்மை'
+      },
+      'Product Approval': {
+        'Sinhala': 'නිෂ්පාදන අනුමැතිය',
+        'Tamil': 'தயாரிப்பு ஒப்புதல்'
+      },
+      'Order Monitoring': {
+        'Sinhala': 'ඇණවුම් නිරීක්ෂණය',
+        'Tamil': 'ஆர்டர் கண்காணிப்பு'
+      },
+      'Content Management': {
+        'Sinhala': 'අන්තර්ගත කළමනාකරණය',
+        'Tamil': 'உள்ளடக்க மேலாண்மை'
+      },
+      'Sales & Analytics': {
+        'Sinhala': 'විකුණුම් සහ විශ්ලේෂණ',
+        'Tamil': 'விற்பனை மற்றும் பகுப்பாய்வு'
+      },
+      'Refund Workflow': {
+        'Sinhala': 'මුදල් ආපසු ගෙවීමේ ක්‍රියාවලිය',
+        'Tamil': 'பணத்தைத் திரும்பப்பெறும் செயல்முறை'
+      },
+      'Dispute Resolution': {
+        'Sinhala': 'ආරවුල් විසඳීම',
+        'Tamil': 'சர்ச்சை தீர்வு'
+      },
+      'System Settings': {
+        'Sinhala': 'පද්ධති සැකසුම්',
+        'Tamil': 'அமைப்பு அமைப்புகள்'
+      },
+      'Help': {
+        'Sinhala': 'උදව්',
+        'Tamil': 'உதவி'
+      },
+      'Logout': {
+        'Sinhala': 'පිටවීම',
+        'Tamil': 'வெளியேறு'
+      },
+
+      // Header Navigation Links
+      'Home': {
+        'Sinhala': 'මුල් පිටුව',
+        'Tamil': 'முகப்பு'
+      },
+      'Shops': {
+        'Sinhala': 'සාප්පු',
+        'Tamil': 'கடைகள்'
+      },
+      'About Us': {
+        'Sinhala': 'අප ගැන',
+        'Tamil': 'எங்களைப் பற்றி'
+      },
+
+      // Dashboard Titles & Metrics
+      'Total Sales': {
+        'Sinhala': 'මුළු විකුණුම්',
+        'Tamil': 'மொத்த விற்பனை'
+      },
+      'New Orders': {
+        'Sinhala': 'නව ඇණවුම්',
+        'Tamil': 'புதிய ஆர்டர்கள்'
+      },
+      'New Sellers': {
+        'Sinhala': 'නව විකුණුම්කරුවන්',
+        'Tamil': 'புதிய விற்பனையாளர்கள்'
+      },
+      'Pending Products': {
+        'Sinhala': 'අනුමත නොකළ නිෂ්පාදන',
+        'Tamil': 'நிலುவையில் உள்ள தயாரிப்புகள்'
+      },
+      'Sales Over Time': {
+        'Sinhala': 'කාලය අනුව විකුණුම්',
+        'Tamil': 'காலப்போக்கில் விற்பனை'
+      },
+      'Top Categories': {
+        'Sinhala': 'ප්‍රමුඛතම ප්‍රවර්ග',
+        'Tamil': 'சிறந்த வகைகள்'
+      },
+
+      // User Profile Info
+      'Admin': {
+        'Sinhala': 'පරිපාලක',
+        'Tamil': 'நிர்வாகி'
+      },
+      'Ayodya Senavirathne': {
+        'Sinhala': 'අයෝද්‍යා සෙනවිරත්න',
+        'Tamil': 'அயோத்யா செனவிரத்ன'
+      },
+
+      // Buttons & UI Controls
+      '+ New Order': {
+        'Sinhala': '+ නව ඇණවුම',
+        'Tamil': '+ புதிய ஆர்டர்'
+      },
+      'System Settings & Variables': {
+        'Sinhala': 'පද්ධති සැකසුම් සහ විචල්‍යයන්',
+        'Tamil': 'அமைப்பு அமைப்புகள் மற்றும் மாறிகள்'
+      },
+      'Configure platform constants and control variables in real-time.': {
+        'Sinhala': 'වේදිකා නියතයන් සහ පාලන විචල්‍යයන් තථ්‍ය කාලීනව සකසන්න.',
+        'Tamil': 'நடைமேடை மாறிலிகள் மற்றும் கட்டுப்பாட்டு மாறிகளை நிகழ்நேரத்தில் கட்டமைக்கவும்.'
+      },
+      'General Settings': {
+        'Sinhala': 'පොදු සැකසුම්',
+        'Tamil': 'பொதுவான அமைப்புகள்'
+      },
+      'System & Localization': {
+        'Sinhala': 'පද්ධතිය සහ ප්‍රාදේශීයකරණය',
+        'Tamil': 'அமைப்பு மற்றும் உள்ளூர்மயமாக்கல்'
+      },
+      'Site Title': {
+        'Sinhala': 'වෙබ් අඩවි ශීර්ෂය',
+        'Tamil': 'தளத்தின் தலைப்பு'
+      },
+      'Tagline': {
+        'Sinhala': 'ටැග්ලයින්',
+        'Tamil': 'குறிக்கோள் வாசகம்'
+      },
+      'Admin Email': {
+        'Sinhala': 'පරිපාලක විද්‍යුත් තැපෑල',
+        'Tamil': 'நிர்வாக மின்னஞ்சல்'
+      },
+      'Maintenance Mode': {
+        'Sinhala': 'නඩත්තු ප්‍රකාරය',
+        'Tamil': 'பராமரிப்பு முறை'
+      },
+      'Caching Status': {
+        'Sinhala': 'හැඹිලි තත්ත්වය',
+        'Tamil': 'கேச்சிங் நிலை'
+      },
+      'Save System Settings': {
+        'Sinhala': 'පද්ධති සැකසුම් සුරකින්න',
+        'Tamil': 'அமைப்பு அமைப்புகளைச் சேமிக்கவும்'
+      },
+      'Default Currency': {
+        'Sinhala': 'පෙරනිමි මුදල් ඒකකය',
+        'Tamil': 'இயல்புநிலை நாணயம்'
+      },
+      'Default Language': {
+        'Sinhala': 'පෙරනිමි භාෂාව',
+        'Tamil': 'இயல்புநிலை மொழி'
+      },
+      'Time Zone': {
+        'Sinhala': 'වේලා කලාපය',
+        'Tamil': 'நேර மண்டலம்'
+      }
+    };
+
+    if (dict[text] && dict[text][lang]) {
+      return dict[text][lang];
+    }
+    return text;
+  };
+
+
+
   const renderContent = () => {
     if (activeTab === 'Dispute Resolution' && selectedDispute) return renderDisputeDetail();
     switch (activeTab) {
@@ -3140,18 +3360,335 @@ const AdminDashboard = () => {
     }
   };
 
+  const notifications = getNotifications();
+  const processingOrdersCount = ordersList.filter(o => o.orderStatus === 'Processing' || o.orderStatus === 'Pending' || o.orderStatus === 'New').length;
+
   return (
     <div className="admin-dashboard-container">
       <aside className="admin-sidebar">
         <div className="sidebar-logo">LANKA CRAFT</div>
-        <div className="admin-profile"><img src={adminAvatar} alt="Admin" className="admin-avatar" /><div className="admin-info"><h3>Ayodya Senavirathne</h3><p>Admin</p></div></div>
+        <div className="admin-profile"><img src={adminAvatar} alt="Admin" className="admin-avatar" /><div className="admin-info"><h3>{translate('Ayodya Senavirathne')}</h3><p>{translate('Admin')}</p></div></div>
         <nav className="sidebar-nav">
-          {navItems.map((item) => (<div key={item.name} className={`nav-item ${activeTab === item.name ? 'active' : ''}`} onClick={() => { setActiveTab(item.name); setSelectedDispute(null); }}>{item.icon}<span>{item.name}</span></div>))}
-          <div className="nav-item-bottom"><div className="nav-item"><HelpCircle size={20} /><span>Help</span></div><div className="nav-item"><LogOut size={20} /><span>Logout</span></div></div>
+          {navItems.map((item) => (<div key={item.name} className={`nav-item ${activeTab === item.name ? 'active' : ''}`} onClick={() => { setActiveTab(item.name); setSelectedDispute(null); }}>{item.icon}<span>{translate(item.name)}</span></div>))}
+          <div className="nav-item-bottom"><div className="nav-item"><HelpCircle size={20} /><span>{translate('Help')}</span></div><div className="nav-item"><LogOut size={20} /><span>{translate('Logout')}</span></div></div>
         </nav>
       </aside>
       <main className="admin-main-content">
-        <header className="admin-header"><nav className="header-nav"><span>Home</span><span>Shops</span><span>About Us</span></nav><div className="header-actions"><div className="action-icon"><Search size={20} /></div><div className="action-icon"><ShoppingBag size={20} /></div><div className="action-icon"><Bell size={20} /></div></div></header>
+        <header className="admin-header" style={{ position: 'relative' }}>
+          <nav className="header-nav">
+            <span 
+              style={{ cursor: 'pointer', transition: 'color 0.2s' }} 
+              onClick={() => navigate('/')}
+              onMouseEnter={(e) => e.target.style.color = '#8D6E63'}
+              onMouseLeave={(e) => e.target.style.color = ''}
+            >
+              {translate('Home')}
+            </span>
+            <span 
+              style={{ cursor: 'pointer', transition: 'color 0.2s' }} 
+              onClick={() => navigate('/categories')}
+              onMouseEnter={(e) => e.target.style.color = '#8D6E63'}
+              onMouseLeave={(e) => e.target.style.color = ''}
+            >
+              {translate('Shops')}
+            </span>
+            <span 
+              style={{ cursor: 'pointer', transition: 'color 0.2s' }} 
+              onClick={() => navigate('/about')}
+              onMouseEnter={(e) => e.target.style.color = '#8D6E63'}
+              onMouseLeave={(e) => e.target.style.color = ''}
+            >
+              {translate('About Us')}
+            </span>
+          </nav>
+          
+          <div className="header-actions">
+            {/* Real-time Global Search */}
+            <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+              {isHeaderSearchOpen && (
+                <input
+                  type="text"
+                  placeholder="Search anything..."
+                  value={headerSearchQuery}
+                  onChange={(e) => setHeaderSearchQuery(e.target.value)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    border: '1px solid #F1E6DA',
+                    outline: 'none',
+                    fontSize: '12px',
+                    width: '180px',
+                    marginRight: '8px',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  autoFocus
+                />
+              )}
+              <div 
+                className="action-icon" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  setIsHeaderSearchOpen(!isHeaderSearchOpen);
+                  if (isHeaderSearchOpen) setHeaderSearchQuery('');
+                }}
+              >
+                <Search size={20} />
+              </div>
+
+              {/* Global Search Results Dropdown Overlay */}
+              {isHeaderSearchOpen && headerSearchQuery.trim().length > 0 && (() => {
+                const query = headerSearchQuery.toLowerCase();
+                const results = [];
+
+                // Search Products
+                productsList.forEach(p => {
+                  if ((p.name || '').toLowerCase().includes(query) || (p.sku || '').toLowerCase().includes(query)) {
+                    results.push({
+                      type: 'Product',
+                      title: p.name,
+                      subtitle: `SKU: ${p.sku || 'N/A'} - LKR ${p.price?.toLocaleString()}`,
+                      targetTab: 'Product Approval'
+                    });
+                  }
+                });
+
+                // Search Orders
+                ordersList.forEach(o => {
+                  if ((o.orderNumber || '').toLowerCase().includes(query) || (o.buyerName || '').toLowerCase().includes(query)) {
+                    results.push({
+                      type: 'Order',
+                      title: `Order ${o.orderNumber}`,
+                      subtitle: `Customer: ${o.buyerName} - LKR ${o.amount?.toLocaleString()}`,
+                      targetTab: 'Order Monitoring'
+                    });
+                  }
+                });
+
+                // Search Sellers
+                sellersList.forEach(s => {
+                  if ((s.name || '').toLowerCase().includes(query)) {
+                    results.push({
+                      type: 'Seller',
+                      title: s.name,
+                      subtitle: `Products: ${s.productsCount} - Sales: LKR ${s.totalSales?.toLocaleString()}`,
+                      targetTab: 'Seller Management'
+                    });
+                  }
+                });
+
+                // Search Users
+                usersList.forEach(u => {
+                  if ((u.name || '').toLowerCase().includes(query) || (u.email || '').toLowerCase().includes(query)) {
+                    results.push({
+                      type: 'User',
+                      title: u.name,
+                      subtitle: `${u.role} - ${u.email}`,
+                      targetTab: 'User Management'
+                    });
+                  }
+                });
+
+                const filteredResults = results.slice(0, 5); // top 5 results
+
+                return (
+                  <div 
+                    className="search-results-overlay"
+                    style={{
+                      position: 'absolute',
+                      top: '40px',
+                      right: '0',
+                      backgroundColor: '#FFF',
+                      border: '1px solid #F1E6DA',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 24px rgba(93, 64, 55, 0.15)',
+                      width: '280px',
+                      zIndex: 1000,
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div style={{
+                      padding: '8px 12px',
+                      borderBottom: '1px solid #FDF6EE',
+                      fontSize: '11px',
+                      color: '#A1887F',
+                      fontWeight: '600'
+                    }}>
+                      Search Results ({filteredResults.length})
+                    </div>
+                    <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
+                      {filteredResults.length > 0 ? (
+                        filteredResults.map((r, i) => (
+                          <div 
+                            key={i} 
+                            style={{
+                              padding: '8px 12px',
+                              borderBottom: i === filteredResults.length - 1 ? 'none' : '1px solid #FDF6EE',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FDFBF7'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                            onClick={() => {
+                              setActiveTab(r.targetTab);
+                              setSelectedDispute(null);
+                              setIsHeaderSearchOpen(false);
+                              setHeaderSearchQuery('');
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px', alignItems: 'center' }}>
+                              <span style={{ fontWeight: '700', fontSize: '11px', color: '#5D4037' }}>{r.title}</span>
+                              <span style={{
+                                fontSize: '9px',
+                                background: '#F1E6DA',
+                                color: '#5D4037',
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                fontWeight: '600'
+                              }}>{r.type}</span>
+                            </div>
+                            <p style={{ fontSize: '10px', color: '#888', margin: '0' }}>{r.subtitle}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '20px 12px', textAlign: 'center', color: '#999', fontSize: '11px' }}>
+                          No matches found.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Shopping Bag / Orders Shortcut */}
+            <div 
+              className="action-icon" 
+              style={{ position: 'relative', cursor: 'pointer' }}
+              onClick={() => { setActiveTab('Order Monitoring'); setSelectedDispute(null); }}
+            >
+              <ShoppingBag size={20} />
+              {processingOrdersCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: '#5D4037',
+                  color: '#FFF',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}>
+                  {processingOrdersCount}
+                </span>
+              )}
+            </div>
+
+            {/* Notification Alerts */}
+            <div 
+              className="action-icon" 
+              style={{ position: 'relative', cursor: 'pointer' }}
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            >
+              <Bell size={20} />
+              {notifications.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  right: '-5px',
+                  backgroundColor: '#D84315',
+                  color: '#FFF',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}>
+                  {notifications.length}
+                </span>
+              )}
+              
+              {/* Notifications Dropdown Card */}
+              {isNotificationsOpen && (
+                <div 
+                  className="notifications-dropdown"
+                  style={{
+                    position: 'absolute',
+                    top: '35px',
+                    right: '0',
+                    backgroundColor: '#FFF',
+                    border: '1px solid #F1E6DA',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(93, 64, 55, 0.15)',
+                    width: '320px',
+                    zIndex: 1000,
+                    cursor: 'default',
+                    textAlign: 'left'
+                  }}
+                  onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                >
+                  <div style={{
+                    padding: '12px 16px',
+                    borderBottom: '1px solid #F1E6DA',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: '#FDFBF7',
+                    borderTopLeftRadius: '12px',
+                    borderTopRightRadius: '12px'
+                  }}>
+                    <strong style={{ color: '#3E2723', fontSize: '14px' }}>System Alerts</strong>
+                    <span style={{ fontSize: '11px', color: '#8D6E63', fontWeight: '600' }}>
+                      {notifications.length} Pending
+                    </span>
+                  </div>
+                  <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                    {notifications.length > 0 ? (
+                      notifications.map((n, i) => (
+                        <div 
+                          key={n.id} 
+                          style={{
+                            padding: '12px 16px',
+                            borderBottom: i === notifications.length - 1 ? 'none' : '1px solid #FDF6EE',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FDFBF7'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                          onClick={() => {
+                            setActiveTab(n.targetTab);
+                            setSelectedDispute(null);
+                            setIsNotificationsOpen(false);
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: '700', fontSize: '12px', color: '#5D4037' }}>{n.title}</span>
+                            <span style={{ fontSize: '9px', color: '#A1887F' }}>{n.time}</span>
+                          </div>
+                          <p style={{ fontSize: '11px', color: '#777', margin: '0' }}>{n.desc}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '30px 16px', textAlign: 'center', color: '#999', fontSize: '12px' }}>
+                        No active alerts. All quiet!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
         {renderContent()}
       </main>
     </div>

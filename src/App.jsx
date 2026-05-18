@@ -20,6 +20,8 @@ import SellerDashboard from "./Pages/SellerDashboard/SellerDashboard";
 import PaymentPage from "./Pages/PaymentPage/PaymentPage";
 import OrderHistory from "./Pages/OrderHistory/OrderHistory";
 import AdminDashboard from "./Pages/AdminDashboard/AdminDashboard";
+import AboutUs from "./Pages/AboutUs/AboutUs";
+
 
 /**
  * Main Application Component
@@ -66,6 +68,8 @@ function App() {
             <Route path="/" element={<LandingPage onAuthOpen={handleAuthOpen} />} />
             <Route path="/home" element={<LandingPage onAuthOpen={handleAuthOpen} />} />
             <Route path="/categories" element={<Categories />} />
+            <Route path="/about" element={<AboutUs />} />
+
             <Route path="/categories/:categoryName" element={<CategoryDetail />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
 
