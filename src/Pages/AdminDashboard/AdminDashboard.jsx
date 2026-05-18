@@ -129,6 +129,35 @@ const AdminDashboard = () => {
   const [orderPaymentFilter, setOrderPaymentFilter] = useState('All Payment Status');
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [newOrderForm, setNewOrderForm] = useState({ buyerName: '', sellerName: '', amount: '' });
+  const [systemSettings, setSystemSettings] = useState({
+    siteTitle: 'Lanka Craft',
+    tagline: 'Handmade with love in Sri Lanka',
+    adminEmail: 'admin@lankacraft.lk',
+    logoUrl: '',
+    maintenanceMode: false,
+    cachingEnabled: true,
+    defaultCurrency: 'SL Rupee (LKR)',
+    defaultLanguage: 'English',
+    timeZone: 'Asia/Colombo (UTC+5.30)'
+  });
+
+  const updateSystemSettings = async (updatedSettings) => {
+    try {
+      const res = await fetch('http://localhost:8082/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedSettings)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSystemSettings(data);
+        return true;
+      }
+    } catch (e) {
+      console.error('Error updating system settings:', e);
+    }
+    return false;
+  };
 
   const productPerformance = [
     { name: 'Batik Sarees', sold: 350, orders: 120, revenue: 'LKR 42,000', category: 'Apparel' },
@@ -252,7 +281,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsR, sellersR, productsR, ordersR, refundsR, disputesR, salesR, categoriesR, usersR, bannersR] = await Promise.all([
+        const [statsR, sellersR, productsR, ordersR, refundsR, disputesR, salesR, categoriesR, usersR, bannersR, settingsR] = await Promise.all([
           fetch('http://localhost:8082/api/admin/stats').then(res => res.json()),
           fetch('http://localhost:8082/api/admin/sellers').then(res => res.json()),
           fetch('http://localhost:8082/api/admin/products').then(res => res.json()),
@@ -262,7 +291,8 @@ const AdminDashboard = () => {
           fetch('http://localhost:8082/api/admin/sales-over-time').then(res => res.json()),
           fetch('http://localhost:8082/api/admin/top-categories').then(res => res.json()),
           fetch('http://localhost:8082/api/admin/users').then(res => res.json()),
-          fetch('http://localhost:8082/api/admin/banners').then(res => res.json())
+          fetch('http://localhost:8082/api/admin/banners').then(res => res.json()),
+          fetch('http://localhost:8082/api/admin/settings').then(res => res.json())
         ]);
         
         setStats(statsR);
@@ -275,6 +305,7 @@ const AdminDashboard = () => {
         setTopCategories(categoriesR);
         setUsersList(usersR);
         setBannersList(bannersR);
+        setSystemSettings(settingsR);
       } catch (error) {
         console.error("Error fetching admin data:", error);
       }
@@ -2483,8 +2514,37 @@ const AdminDashboard = () => {
                 <label>Mediation Tools</label>
                 <button
                   className="btn-primary-blue"
-                  onClick={() => setDisputeTab('Communication')}
-                  title="Switch to Communication tab to send a message"
+                  onClick={async () => {
+                    const { value: messageText, isConfirmed } = await Swal.fire({
+                      title: 'Send Mediation Message',
+                      html: `<p style="font-size:13px;color:#666;margin-bottom:12px;">Type a message to send directly to the dispute communication thread. Both parties will be notified.</p>`,
+                      input: 'textarea',
+                      inputPlaceholder: 'Type your mediation message here...',
+                      inputAttributes: { rows: 4, style: 'font-size:13px;resize:none;' },
+                      confirmButtonText: 'Send Message',
+                      confirmButtonColor: '#4285F4',
+                      showCancelButton: true,
+                      cancelButtonColor: '#9e9e9e',
+                      inputValidator: (value) => { if (!value?.trim()) return 'Please enter a message.' }
+                    });
+                    if (isConfirmed && messageText?.trim()) {
+                      try {
+                        const res = await fetch(`http://localhost:8082/api/admin/disputes/${selectedDispute.id}/message`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(messageText.trim())
+                        });
+                        if (res.ok) {
+                          const updated = await res.json();
+                          setDisputesList(prev => prev.map(d => d.id === updated.id ? updated : d));
+                          setSelectedDispute(updated);
+                          setDisputeTab('Communication');
+                          Swal.fire({ icon: 'success', title: 'Message Sent', text: 'Your message has been posted to the communication thread.', confirmButtonColor: '#4285F4', timer: 2000 });
+                        }
+                      } catch (e) { console.error('Error sending message:', e); }
+                    }
+                  }}
+                  title="Send a mediation message to the dispute thread"
                 >
                   <Send size={16} /> Send Message
                 </button>
@@ -2531,9 +2591,9 @@ const AdminDashboard = () => {
               <div className="action-sub-group" style={{ marginTop: '20px' }}>
                 <label>Make a Decision</label>
                 {selectedDispute.status === 'Resolved' ? (
-                  <div style={{ padding: '12px', background: '#E8F5E9', borderRadius: '8px', border: '1px solid #A5D6A7', textAlign: 'center' }}>
+                  <div style={{ padding: '12px', background: '#E8F5E9', borderRadius: '8px', border: '1px solid #A5D6A7' }}>
                     <div style={{ fontSize: '13px', fontWeight: '700', color: '#2E7D32', marginBottom: '4px' }}>✓ Dispute Resolved</div>
-                    <div style={{ fontSize: '12px', color: '#388E3C' }}>Outcome: ${selectedDispute.outcome}</div>
+                    <div style={{ fontSize: '12px', color: '#388E3C' }}>Outcome: {selectedDispute.outcome}</div>
                   </div>
                 ) : (
                   <>
@@ -2585,7 +2645,127 @@ const AdminDashboard = () => {
               <div className="action-sub-group" style={{ marginTop: '20px' }}>
                 <label>Related Information</label>
                 <div className="related-links-list">
-                  <div className="related-link"><User size={14} /> View Buyer's Profile</div><div className="related-link"><User size={14} /> View Seller's Profile</div><div className="related-link"><Package size={14} /> View Product Page</div>
+                  <div 
+                    className="related-link" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      const buyerUser = usersList.find(u => u.name?.toLowerCase() === selectedDispute.buyerName?.toLowerCase());
+                      const bName = buyerUser ? buyerUser.name : (selectedDispute.buyerName || 'N/A');
+                      const bEmail = buyerUser ? buyerUser.email : 'buyer@example.com';
+                      const bRole = buyerUser ? buyerUser.role : 'Buyer';
+                      const bRegDate = buyerUser ? buyerUser.registrationDate : 'May 10, 2026';
+                      const bStatus = buyerUser ? buyerUser.status : 'Active';
+
+                      Swal.fire({
+                        title: 'Buyer Profile',
+                        html: `
+                          <div style="text-align: left; font-size: 14px; color: #555; padding: 10px 0;">
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Full Name:</strong> <span style="float: right; font-weight: 600;">${bName}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Email Address:</strong> <span style="float: right;">${bEmail}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Role:</strong> <span style="float: right; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">${bRole}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Member Since:</strong> <span style="float: right;">${bRegDate}</span>
+                            </div>
+                            <div style="margin-bottom: 5px;">
+                              <strong style="color: #3e2723;">Account Status:</strong> <span style="float: right; background: ${bStatus === 'Active' ? '#e8f5e9' : '#ffebee'}; color: ${bStatus === 'Active' ? '#2e7d32' : '#c62828'}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">${bStatus}</span>
+                            </div>
+                          </div>
+                        `,
+                        confirmButtonText: 'Done',
+                        confirmButtonColor: '#5D4037'
+                      });
+                    }}
+                  >
+                    <User size={14} /> View Buyer's Profile
+                  </div>
+                  <div 
+                    className="related-link" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      const sellerObj = sellersList.find(s => s.name?.toLowerCase() === selectedDispute.sellerName?.toLowerCase());
+                      const sName = sellerObj ? sellerObj.name : (selectedDispute.sellerName || 'N/A');
+                      const sProducts = sellerObj ? sellerObj.productsCount : '12';
+                      const sSales = sellerObj ? `LKR ${sellerObj.totalSales?.toLocaleString()}` : 'LKR 45,000';
+                      const sRegDate = sellerObj ? sellerObj.registrationDate : 'April 20, 2026';
+                      const sStatus = sellerObj ? sellerObj.status : 'Active';
+
+                      Swal.fire({
+                        title: 'Seller Profile',
+                        html: `
+                          <div style="text-align: left; font-size: 14px; color: #555; padding: 10px 0;">
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Shop Name:</strong> <span style="float: right; font-weight: 600;">${sName}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Total Products:</strong> <span style="float: right; font-weight: 600; color: #8d6e63;">${sProducts}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Total Sales:</strong> <span style="float: right; font-weight: 600; color: #2e7d32;">${sSales}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Seller Since:</strong> <span style="float: right;">${sRegDate}</span>
+                            </div>
+                            <div style="margin-bottom: 5px;">
+                              <strong style="color: #3e2723;">Verification Status:</strong> <span style="float: right; background: ${sStatus === 'Active' ? '#e8f5e9' : '#fff3e0'}; color: ${sStatus === 'Active' ? '#2e7d32' : '#e65100'}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">${sStatus}</span>
+                            </div>
+                          </div>
+                        `,
+                        confirmButtonText: 'Done',
+                        confirmButtonColor: '#5D4037'
+                      });
+                    }}
+                  >
+                    <User size={14} /> View Seller's Profile
+                  </div>
+                  <div 
+                    className="related-link" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      const productObj = productsList.find(p => p.name?.toLowerCase() === selectedDispute.itemName?.toLowerCase());
+                      const pName = productObj ? productObj.name : (selectedDispute.itemName || 'N/A');
+                      const pCategory = productObj ? productObj.category : 'Handicrafts';
+                      const pPrice = productObj ? `LKR ${productObj.price?.toLocaleString()}` : 'LKR 4,200';
+                      const pSku = productObj ? productObj.sku : 'SKU-VASE-101';
+                      const pStock = productObj ? productObj.stock : '15';
+                      const pStatus = productObj ? productObj.status : 'Active';
+
+                      Swal.fire({
+                        title: 'Product Information',
+                        html: `
+                          <div style="text-align: left; font-size: 14px; color: #555; padding: 10px 0;">
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Product Name:</strong> <span style="float: right; font-weight: 600;">${pName}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">SKU Code:</strong> <span style="float: right; font-family: monospace; font-size: 12px;">${pSku}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Category:</strong> <span style="float: right;">${pCategory}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Unit Price:</strong> <span style="float: right; font-weight: 600; color: #2e7d32;">${pPrice}</span>
+                            </div>
+                            <div style="margin-bottom: 10px; border-bottom: 1px solid #f1e6da; padding-bottom: 8px;">
+                              <strong style="color: #3e2723;">Available Stock:</strong> <span style="float: right; font-weight: 600;">${pStock} units</span>
+                            </div>
+                            <div style="margin-bottom: 5px;">
+                              <strong style="color: #3e2723;">Listing Status:</strong> <span style="float: right; background: ${pStatus === 'Active' ? '#e8f5e9' : '#fff3e0'}; color: ${pStatus === 'Active' ? '#2e7d32' : '#e65100'}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">${pStatus}</span>
+                            </div>
+                          </div>
+                        `,
+                        confirmButtonText: 'Done',
+                        confirmButtonColor: '#5D4037'
+                      });
+                    }}
+                  >
+                    <Package size={14} /> View Product Page
+                  </div>
                 </div>
               </div>
             </div>
@@ -2718,16 +2898,231 @@ const AdminDashboard = () => {
     );
   };
 
-  const renderSystemSettings = () => (
-    <div className="system-settings-view">
-      <div className="admin-view-header"><h2>System Settings</h2></div>
-      <div className="settings-container">
-        <div className="settings-card"><div className="settings-card-header"><h3>Site Information</h3></div><div className="settings-card-body"><div className="settings-group"><label>Site Title</label><input type="text" className="settings-input" defaultValue="Lanka Craft" /></div><div className="settings-group"><label>Tagline</label><input type="text" className="settings-input" defaultValue="Handmade with love in Sri Lanka" /></div><div className="settings-group"><label>Admin Email Address</label><input type="email" className="settings-input" defaultValue="admin@lankacraft.lk" /></div><div className="settings-group"><label>Site Logo</label><div className="logo-section"><div className="logo-preview">Logo</div><button className="upload-btn">Upload New Logo</button></div></div></div></div>
-        <div className="settings-card"><div className="settings-card-header"><h3>Maintenance & Performance</h3></div><div className="settings-card-body"><div className="settings-toggle-row"><div className="toggle-info"><h4>Enable Maintenance Mode</h4><p>Puts the storefront in maintenance mode. Admins can still access the site.</p></div><label className="switch"><input type="checkbox" /><span className="slider"></span></label></div><div className="settings-toggle-row"><div className="toggle-info"><h4>Enable Caching</h4><p>Improves site performance by caching pages. Recommended for production.</p></div><label className="switch"><input type="checkbox" defaultChecked /><span className="slider"></span></label></div></div></div>
-        <div className="settings-card"><div className="settings-card-header"><h3>Localization</h3></div><div className="settings-card-body"><div className="localization-grid"><div className="settings-group"><label>Default Currency</label><select className="settings-input"><option>SL Rupee (LKR)</option></select></div><div className="settings-group"><label>Default Language</label><select className="settings-input"><option>English</option></select></div></div><div className="settings-group"><label>Time Zone</label><select className="settings-input"><option>Asia/Colombo (UTC+5.30)</option></select></div></div></div>
+  const renderSystemSettings = () => {
+    const handleInputChange = (field, value) => {
+      setSystemSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleToggleChange = async (field, currentValue) => {
+      const updated = { ...systemSettings, [field]: !currentValue };
+      setSystemSettings(updated);
+      const success = await updateSystemSettings(updated);
+      if (success) {
+        Swal.fire({
+          icon: 'success',
+          title: field === 'maintenanceMode' ? 'Maintenance Mode Updated' : 'Caching Setting Updated',
+          text: `System configuration has been updated successfully in the database.`,
+          confirmButtonColor: '#5D4037',
+          timer: 1500,
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false
+        });
+      }
+    };
+
+    const handleSelectChange = async (field, value) => {
+      const updated = { ...systemSettings, [field]: value };
+      setSystemSettings(updated);
+      const success = await updateSystemSettings(updated);
+      if (success) {
+        let label = '';
+        if (field === 'defaultCurrency') label = 'Currency Updated';
+        else if (field === 'defaultLanguage') label = 'Language Updated';
+        else if (field === 'timeZone') label = 'Time Zone Updated';
+
+        Swal.fire({
+          icon: 'success',
+          title: label,
+          text: `Localization setting updated to "${value}" in database in real-time.`,
+          confirmButtonColor: '#5D4037',
+          timer: 1500,
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false
+        });
+      }
+    };
+
+    return (
+      <div className="system-settings-view">
+        <div className="admin-view-header"><h2>System Settings</h2></div>
+        <div className="settings-container">
+          {/* Site Information */}
+          <div className="settings-card">
+            <div className="settings-card-header"><h3>Site Information</h3></div>
+            <div className="settings-card-body">
+              <div className="settings-group">
+                <label>Site Title</label>
+                <input 
+                  type="text" 
+                  className="settings-input" 
+                  value={systemSettings.siteTitle || ''} 
+                  onChange={(e) => handleInputChange('siteTitle', e.target.value)}
+                />
+              </div>
+              <div className="settings-group">
+                <label>Tagline</label>
+                <input 
+                  type="text" 
+                  className="settings-input" 
+                  value={systemSettings.tagline || ''} 
+                  onChange={(e) => handleInputChange('tagline', e.target.value)}
+                />
+              </div>
+              <div className="settings-group">
+                <label>Admin Email Address</label>
+                <input 
+                  type="email" 
+                  className="settings-input" 
+                  value={systemSettings.adminEmail || ''} 
+                  onChange={(e) => handleInputChange('adminEmail', e.target.value)}
+                />
+              </div>
+              <div className="settings-group">
+                <label>Site Logo</label>
+                <div className="logo-section">
+                  <div className="logo-preview">
+                    {systemSettings.logoUrl ? (
+                      <img src={systemSettings.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : 'Logo'}
+                  </div>
+                  <button 
+                    className="upload-btn"
+                    onClick={async () => {
+                      const { value: url } = await Swal.fire({
+                        title: 'Upload Site Logo',
+                        input: 'url',
+                        inputLabel: 'Logo Image URL',
+                        inputPlaceholder: 'Enter absolute logo image URL...',
+                        confirmButtonColor: '#5D4037',
+                        showCancelButton: true
+                      });
+                      if (url) {
+                        const updated = { ...systemSettings, logoUrl: url };
+                        setSystemSettings(updated);
+                        await updateSystemSettings(updated);
+                        Swal.fire({ icon: 'success', title: 'Logo Updated', confirmButtonColor: '#5D4037', timer: 1500 });
+                      }
+                    }}
+                  >
+                    Upload New Logo
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  className="btn-primary-blue"
+                  style={{ backgroundColor: '#5D4037', color: '#FFF', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', border: 'none', cursor: 'pointer' }}
+                  onClick={async () => {
+                    const success = await updateSystemSettings(systemSettings);
+                    if (success) {
+                      Swal.fire({
+                        icon: 'success',
+                        title: 'Settings Saved',
+                        text: 'Site Information has been successfully saved to the database.',
+                        confirmButtonColor: '#5D4037',
+                        timer: 2000
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Save Failed',
+                        text: 'Could not save settings. Please check backend status.',
+                        confirmButtonColor: '#5D4037'
+                      });
+                    }
+                  }}
+                >
+                  Save Site Info
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Maintenance & Performance */}
+          <div className="settings-card">
+            <div className="settings-card-header"><h3>Maintenance & Performance</h3></div>
+            <div className="settings-card-body">
+              <div className="settings-toggle-row">
+                <div className="toggle-info">
+                  <h4>Enable Maintenance Mode</h4>
+                  <p>Puts the storefront in maintenance mode. Admins can still access the site.</p>
+                </div>
+                <label className="switch">
+                  <input 
+                    type="checkbox" 
+                    checked={!!systemSettings.maintenanceMode} 
+                    onChange={() => handleToggleChange('maintenanceMode', !!systemSettings.maintenanceMode)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <div className="settings-toggle-row">
+                <div className="toggle-info">
+                  <h4>Enable Caching</h4>
+                  <p>Improves site performance by caching pages. Recommended for production.</p>
+                </div>
+                <label className="switch">
+                  <input 
+                    type="checkbox" 
+                    checked={!!systemSettings.cachingEnabled} 
+                    onChange={() => handleToggleChange('cachingEnabled', !!systemSettings.cachingEnabled)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Localization */}
+          <div className="settings-card">
+            <div className="settings-card-header"><h3>Localization</h3></div>
+            <div className="settings-card-body">
+              <div className="localization-grid">
+                <div className="settings-group">
+                  <label>Default Currency</label>
+                  <select 
+                    className="settings-input"
+                    value={systemSettings.defaultCurrency || 'SL Rupee (LKR)'}
+                    onChange={(e) => handleSelectChange('defaultCurrency', e.target.value)}
+                  >
+                    <option value="SL Rupee (LKR)">SL Rupee (LKR)</option>
+                    <option value="US Dollar (USD)">US Dollar (USD)</option>
+                    <option value="Euro (EUR)">Euro (EUR)</option>
+                  </select>
+                </div>
+                <div className="settings-group">
+                  <label>Default Language</label>
+                  <select 
+                    className="settings-input"
+                    value={systemSettings.defaultLanguage || 'English'}
+                    onChange={(e) => handleSelectChange('defaultLanguage', e.target.value)}
+                  >
+                    <option value="English">English</option>
+                    <option value="Sinhala">Sinhala</option>
+                    <option value="Tamil">Tamil</option>
+                  </select>
+                </div>
+              </div>
+              <div className="settings-group">
+                <label>Time Zone</label>
+                <select 
+                  className="settings-input"
+                  value={systemSettings.timeZone || 'Asia/Colombo (UTC+5.30)'}
+                  onChange={(e) => handleSelectChange('timeZone', e.target.value)}
+                >
+                  <option value="Asia/Colombo (UTC+5.30)">Asia/Colombo (UTC+5.30)</option>
+                  <option value="UTC (UTC+0.00)">UTC (UTC+0.00)</option>
+                  <option value="Asia/Kolkata (UTC+5.30)">Asia/Kolkata (UTC+5.30)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderContent = () => {
     if (activeTab === 'Dispute Resolution' && selectedDispute) return renderDisputeDetail();
