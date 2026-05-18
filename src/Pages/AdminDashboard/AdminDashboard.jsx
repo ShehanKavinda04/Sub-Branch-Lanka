@@ -41,6 +41,8 @@ import bannerSale from '../../assets/banner_sale.png';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [refundSubTab, setRefundSubTab] = useState('New');
+  const [refundSearch, setRefundSearch] = useState('');
+  const [refundSeller, setRefundSeller] = useState('All Sellers');
   const [analyticsSubTab, setAnalyticsSubTab] = useState('Sales Overview');
   const [timePeriod, setTimePeriod] = useState('Today');
   const [selectedDispute, setSelectedDispute] = useState(null);
@@ -1841,9 +1843,67 @@ const AdminDashboard = () => {
   );
 
   const renderRefundWorkflow = () => {
-    const newRequestsCount = refundsList.filter(r => r.status === 'New').length;
-    const underReviewCount = refundsList.filter(r => r.status === 'Under Review').length;
-    const awaitingSellerCount = refundsList.filter(r => r.status === 'Awaiting Seller Action').length;
+    const getRefundSellerName = (refund) => {
+      const refundDigits = (refund.orderNumber || '').replace(/\D/g, '');
+      const order = ordersList.find(o => (o.orderNumber || '').replace(/\D/g, '') === refundDigits);
+      if (order) return order.sellerName;
+      if (refundDigits === '1234') return 'Crafty Hand';
+      if (refundDigits === '5678') return 'Island Gems';
+      if (refundDigits === '1111') return 'Wood Art';
+      if (refundDigits === '2222') return 'Crafty Hand';
+      if (refundDigits === '3333') return 'Wood Art';
+      if (refundDigits === '4444') return 'Island Gems';
+      if (refundDigits === '5555') return 'Jewel Craft';
+      return 'Silk Waves';
+    };
+
+    const refundSellers = ['All Sellers', ...new Set(refundsList.map(r => getRefundSellerName(r)))];
+
+    const getFilteredCount = (status) => {
+      return refundsList.filter(refund => {
+        if (refund.status !== status) return false;
+        
+        if (refundSeller !== 'All Sellers') {
+          const sName = getRefundSellerName(refund);
+          if (sName !== refundSeller) return false;
+        }
+
+        if (refundSearch.trim() !== '') {
+          const q = refundSearch.toLowerCase();
+          const orderNo = (refund.orderNumber || '').toLowerCase();
+          const custName = (refund.customerName || '').toLowerCase();
+          const prodName = (refund.productName || '').toLowerCase();
+          const sName = getRefundSellerName(refund).toLowerCase();
+          if (!orderNo.includes(q) && !custName.includes(q) && !prodName.includes(q) && !sName.includes(q)) return false;
+        }
+
+        return true;
+      }).length;
+    };
+
+    const newRequestsCount = getFilteredCount('New');
+    const underReviewCount = getFilteredCount('Under Review');
+    const awaitingSellerCount = getFilteredCount('Awaiting Seller Action');
+
+    const filteredRefunds = refundsList.filter(refund => {
+      if (refund.status !== refundSubTab) return false;
+
+      if (refundSeller !== 'All Sellers') {
+        const sName = getRefundSellerName(refund);
+        if (sName !== refundSeller) return false;
+      }
+
+      if (refundSearch.trim() !== '') {
+        const q = refundSearch.toLowerCase();
+        const orderNo = (refund.orderNumber || '').toLowerCase();
+        const custName = (refund.customerName || '').toLowerCase();
+        const prodName = (refund.productName || '').toLowerCase();
+        const sName = getRefundSellerName(refund).toLowerCase();
+        if (!orderNo.includes(q) && !custName.includes(q) && !prodName.includes(q) && !sName.includes(q)) return false;
+      }
+
+      return true;
+    });
 
     const formatRefundTime = (timeStr) => {
       if (!timeStr) return '';
@@ -1863,10 +1923,21 @@ const AdminDashboard = () => {
         <div className="filters-bar" style={{ justifyContent: 'space-between' }}>
           <div className="search-bar-container">
             <Search size={18} />
-            <input type="text" placeholder="Search by order ID, Customer Name, Date....." />
+            <input 
+              type="text" 
+              placeholder="Search by order ID, Customer Name, Date....." 
+              value={refundSearch}
+              onChange={(e) => setRefundSearch(e.target.value)}
+            />
           </div>
-          <select className="filter-select">
-            <option>All Sellers</option>
+          <select 
+            className="filter-select"
+            value={refundSeller}
+            onChange={(e) => setRefundSeller(e.target.value)}
+          >
+            {refundSellers.map((seller, i) => (
+              <option key={i} value={seller}>{seller}</option>
+            ))}
           </select>
         </div>
         <div className="refund-tabs">
@@ -1881,9 +1952,8 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className="refund-card-grid">
-          {refundsList
-            .filter(r => r.status === refundSubTab)
-            .map((refund, index) => (
+          {filteredRefunds.length > 0 ? (
+            filteredRefunds.map((refund, index) => (
               <div className="refund-card" key={index}>
                 <div className="refund-card-header">
                   <h4>Order {refund.orderNumber}</h4>
@@ -1897,7 +1967,12 @@ const AdminDashboard = () => {
                   <div className="refund-amount">{formatCurrency(refund.amount)}</div>
                 </div>
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="no-records-message" style={{ gridColumn: 'span 2', textAlign: 'center', padding: '40px', color: '#999', fontSize: '14px', fontWeight: '500' }}>
+              No refund requests found matching your criteria.
+            </div>
+          )}
         </div>
       </div>
     );
