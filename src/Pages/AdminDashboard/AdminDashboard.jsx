@@ -92,6 +92,13 @@ const AdminDashboard = () => {
   const [sellerSearch, setSellerSearch] = useState('');
   const [sellerStatusFilter, setSellerStatusFilter] = useState('All Status');
 
+  // Dispute Resolution State
+  const [disputeSearch, setDisputeSearch] = useState('');
+  const [disputeSeller, setDisputeSeller] = useState('All Sellers');
+  const [disputeStatusFilter, setDisputeStatusFilter] = useState('All Status');
+  const [disputeCommentInput, setDisputeCommentInput] = useState('');
+  const [disputeMessageInput, setDisputeMessageInput] = useState('');
+
   // Product Approval State
   const [productCurrentPage, setProductCurrentPage] = useState(1);
   const [productSearch, setProductSearch] = useState('');
@@ -1998,107 +2005,367 @@ const AdminDashboard = () => {
     );
   };
 
-  const renderDisputeDetail = () => (
-    <div className="dispute-detail-view">
-      <div className="admin-view-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setSelectedDispute(null)}>
-          <ChevronLeft size={24} />
-          <h2>Refund Workflow Management</h2>
+  const handleDisputeDecision = async (outcome) => {
+    try {
+      const res = await fetch(`http://localhost:8082/api/admin/disputes/${selectedDispute.id}/decision`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(outcome)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setDisputesList(prev => prev.map(d => d.id === updated.id ? updated : d));
+        setSelectedDispute(updated);
+      }
+    } catch (e) {
+      console.error("Error making dispute decision:", e);
+    }
+  };
+
+  const handleSendComment = async () => {
+    if (!disputeCommentInput.trim()) return;
+    try {
+      const res = await fetch(`http://localhost:8082/api/admin/disputes/${selectedDispute.id}/comment`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(disputeCommentInput)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setDisputesList(prev => prev.map(d => d.id === updated.id ? updated : d));
+        setSelectedDispute(updated);
+        setDisputeCommentInput('');
+      }
+    } catch (e) {
+      console.error("Error saving dispute comment:", e);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!disputeMessageInput.trim()) return;
+    try {
+      const res = await fetch(`http://localhost:8082/api/admin/disputes/${selectedDispute.id}/message`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(disputeMessageInput)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setDisputesList(prev => prev.map(d => d.id === updated.id ? updated : d));
+        setSelectedDispute(updated);
+        setDisputeMessageInput('');
+      }
+    } catch (e) {
+      console.error("Error saving dispute message:", e);
+    }
+  };
+
+  const renderDisputeDetail = () => {
+    const buyerEvidence = {
+      uploadedBy: selectedDispute.buyerName || 'Ayodya Senavirathne',
+      date: 'May 16, 2026',
+      images: [vaseImg],
+      count: 1
+    };
+
+    const sellerEvidence = {
+      uploadedBy: selectedDispute.sellerName || 'Silk Waves',
+      date: 'May 17, 2026',
+      files: [
+        { name: 'product_packaging_video.mp4', size: '14.5 MB', type: 'video' },
+        { name: 'courier_receipt.pdf', size: '1.2 MB', type: 'document' }
+      ]
+    };
+
+    const defaultMessages = [
+      { sender: selectedDispute.buyerName || 'Ayodya Senavirathne', role: 'Buyer', time: 'May 16, 2026, 10:15 AM', content: 'The item arrived with a crack on the base. I request a full refund.', type: 'buyer' },
+      { sender: selectedDispute.sellerName || 'Silk Waves', role: 'Seller', time: 'May 16, 2026, 2:30 PM', content: 'We package all items securely in bubble wrap. This damage must have occurred during transit.', type: 'seller' },
+      { sender: 'System Auto-Escalation', role: 'System', time: 'May 17, 2026, 9:00 AM', content: 'Dispute auto-escalated to admin review due to seller and buyer disagreement.', type: 'system' }
+    ];
+
+    const messages = selectedDispute.messagesJson ? JSON.parse(selectedDispute.messagesJson) : defaultMessages;
+
+    return (
+      <div className="dispute-detail-view">
+        <div className="admin-view-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setSelectedDispute(null)}>
+            <ChevronLeft size={24} />
+            <h2>Dispute Resolution Center</h2>
+          </div>
         </div>
-      </div>
-      <div className="dispute-detail-header-card"><span className="dispute-id-label">Dispute ID {selectedDispute.id}</span><h3 className="dispute-title-large">{selectedDispute.reason}</h3><span className="pending-action-badge">Pending Admin Action</span></div>
-      <div className="dispute-detail-tabs">
-        <div className={`dispute-detail-tab ${disputeTab === 'Summary' ? 'active' : ''}`} onClick={() => setDisputeTab('Summary')}>Summary</div>
-        <div className={`dispute-detail-tab ${disputeTab === 'Communication' ? 'active' : ''}`} onClick={() => setDisputeTab('Communication')}>Communication</div>
-        <div className={`dispute-detail-tab ${disputeTab === 'Evidence' ? 'active' : ''}`} onClick={() => setDisputeTab('Evidence')}>Evidence</div>
-      </div>
-      <div className="dispute-grid-layout">
-        <div className="detail-section-card">
-          {disputeTab === 'Evidence' ? (
-            <div className="evidence-container">
-              <div className="evidence-block">
-                <h4>Buyer's Evidence</h4>
-                <p>Uploaded by {buyerEvidence.uploadedBy} on {buyerEvidence.date}</p>
-                <div className="evidence-image-grid">
-                  {buyerEvidence.images.map((img, i) => <img src={img} alt="Evidence" className="evidence-img" key={i} />)}
+        <div className="dispute-detail-header-card">
+          <span className="dispute-id-label">Dispute ID {selectedDispute.id}</span>
+          <h3 className="dispute-title-large">{selectedDispute.reason}</h3>
+          <span className={`status-badge ${selectedDispute.status.toLowerCase()}`} style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
+            {selectedDispute.status}
+          </span>
+        </div>
+        <div className="dispute-detail-tabs">
+          <div className={`dispute-detail-tab ${disputeTab === 'Summary' ? 'active' : ''}`} onClick={() => setDisputeTab('Summary')}>Summary</div>
+          <div className={`dispute-detail-tab ${disputeTab === 'Communication' ? 'active' : ''}`} onClick={() => setDisputeTab('Communication')}>Communication</div>
+          <div className={`dispute-detail-tab ${disputeTab === 'Evidence' ? 'active' : ''}`} onClick={() => setDisputeTab('Evidence')}>Evidence</div>
+        </div>
+        <div className="dispute-grid-layout">
+          <div className="detail-section-card">
+            {disputeTab === 'Evidence' ? (
+              <div className="evidence-container">
+                <div className="evidence-block">
+                  <h4>Buyer's Evidence</h4>
+                  <p>Uploaded by {buyerEvidence.uploadedBy} on {buyerEvidence.date}</p>
+                  <div className="evidence-image-grid">
+                    {buyerEvidence.images.map((img, i) => <img src={img} alt="Evidence" className="evidence-img" key={i} />)}
+                  </div>
+                  <div className="evidence-footer"><span>{buyerEvidence.count} images files</span><div className="download-link"><Download size={14} /> Download All</div></div>
+                  <div className="admin-comments-section">
+                    <h5>Admin Comments</h5>
+                    {selectedDispute.adminComment && (
+                      <div className="admin-comment-bubble" style={{
+                        backgroundColor: '#efebe9',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        marginBottom: '12px',
+                        fontSize: '13px',
+                        color: '#4e342e',
+                        borderLeft: '4px solid #5d4037',
+                        position: 'relative',
+                        textAlign: 'left'
+                      }}>
+                        <p style={{ margin: 0, fontWeight: '500' }}>{selectedDispute.adminComment}</p>
+                        <span style={{ fontSize: '10px', color: '#8d6e63', display: 'block', marginTop: '4px' }}>Posted by Admin</span>
+                      </div>
+                    )}
+                    <div className="admin-comment-box">
+                      <input 
+                        type="text" 
+                        placeholder="Add a comment on Buyer's Evidence......" 
+                        value={disputeCommentInput}
+                        onChange={(e) => setDisputeCommentInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSendComment(); }}
+                      />
+                      <Send size={16} className="send-btn" onClick={handleSendComment} style={{ cursor: 'pointer' }} />
+                    </div>
+                  </div>
                 </div>
-                <div className="evidence-footer"><span>{buyerEvidence.count} images files</span><div className="download-link"><Download size={14} /> Download All</div></div>
-                <div className="admin-comments-section"><h5>Admin Comments</h5><div className="admin-comment-box"><input type="text" placeholder="Add a comment on Buyer's Evidence......" /><Send size={16} className="send-btn" /></div></div>
+                <div className="evidence-block">
+                  <h4>Seller's Evidence</h4>
+                  <p>Uploaded by {sellerEvidence.uploadedBy} on {sellerEvidence.date}</p>
+                  <div className="file-list">
+                    {sellerEvidence.files.map((file, i) => (
+                      <div className="file-item" key={i}>
+                        <div className="file-info"><div className={`file-icon ${file.type === 'video' ? 'video' : ''}`}>{file.type === 'video' ? <Video size={18} /> : <FileIcon size={18} />}</div><div className="file-details"><h6>{file.name}</h6><span>{file.size}</span></div></div>
+                        <div className="file-actions"><Eye size={16} /><Download size={16} /></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="evidence-block">
-                <h4>Seller's Evidence</h4>
-                <p>Uploaded by {sellerEvidence.uploadedBy} on {sellerEvidence.date}</p>
-                <div className="file-list">
-                  {sellerEvidence.files.map((file, i) => (
-                    <div className="file-item" key={i}>
-                      <div className="file-info"><div className={`file-icon ${file.type === 'video' ? 'video' : ''}`}>{file.type === 'video' ? <Video size={18} /> : <FileIcon size={18} />}</div><div className="file-details"><h6>{file.name}</h6><span>{file.size}</span></div></div>
-                      <div className="file-actions"><Eye size={16} /><Download size={16} /></div>
+            ) : disputeTab === 'Communication' ? (
+              <div className="communication-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div className="message-thread" style={{ maxHeight: '380px', overflowY: 'auto' }}>
+                  {messages.map((m, i) => (
+                    <div className="message-item" key={i}>
+                      <div className={`message-avatar ${m.type}`}>{m.type === 'buyer' ? <User size={18} /> : m.type === 'seller' ? <Store size={18} /> : <User size={18} />}</div>
+                      <div className="message-content-wrapper">
+                        <div className="message-header"><div className="sender-info">{m.sender}<span className="sender-role">({m.role})</span></div><span className="message-time">{m.time}</span></div>
+                        <div className={`message-bubble ${m.type === 'system' ? 'admin-note' : ''}`}>{m.content}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
+                <div className="admin-message-input-bar" style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Type a mediation message to the thread..." 
+                    value={disputeMessageInput}
+                    onChange={(e) => setDisputeMessageInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+                    style={{
+                      flex: 1,
+                      padding: '10px 14px',
+                      borderRadius: '20px',
+                      border: '1px solid #ccc',
+                      fontSize: '13px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button 
+                    onClick={handleSendMessage}
+                    style={{
+                      backgroundColor: '#5D4037',
+                      color: '#FFF',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#4E342E'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#5D4037'}
+                  >
+                    <Send size={14} />
+                    <span>Send</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h4>Case Details</h4>
+                <div className="case-details-grid">
+                  <div className="detail-item"><label>Buyer</label><span>{selectedDispute.buyerName || selectedDispute.buyer || 'N/A'}</span></div>
+                  <div className="detail-item"><label>Seller</label><span>{selectedDispute.sellerName || selectedDispute.seller || 'N/A'}</span></div>
+                  <div className="detail-item"><label>Item</label><span>{selectedDispute.itemName || selectedDispute.item || 'N/A'}</span></div>
+                  <div className="detail-item"><label>Order ID</label><span>{selectedDispute.orderNumber || selectedDispute.orderId || 'N/A'}</span></div>
+                  <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Dispute Reason</label><span>{selectedDispute.reason || 'N/A'}</span></div>
+                  <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Desired Outcome</label><span>{selectedDispute.outcome || 'N/A'}</span></div>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="action-info-group">
+            <div className="detail-section-card">
+              <h4>Action & Info</h4>
+              <div className="action-sub-group"><label>Mediation Tools</label><button className="btn-primary-blue"><Send size={16} /> Send Message</button><div className="request-info-link"><Info size={14} /> Request More Info</div></div>
+              <div className="action-sub-group" style={{ marginTop: '20px' }}><label>Make a Decision</label><button className="btn-decision-buyer" onClick={() => handleDisputeDecision('Full Refund')}><ThumbsUp size={16} /> Rule in Favor of Buyer</button><button className="btn-decision-seller" onClick={() => handleDisputeDecision('Dismissed')}><ThumbsDown size={16} /> Rule in Favor of Seller</button></div>
+              <div className="action-sub-group" style={{ marginTop: '20px' }}>
+                <label>Related Information</label>
+                <div className="related-links-list">
+                  <div className="related-link"><User size={14} /> View Buyer's Profile</div><div className="related-link"><User size={14} /> View Seller's Profile</div><div className="related-link"><Package size={14} /> View Product Page</div>
+                </div>
               </div>
             </div>
-          ) : disputeTab === 'Communication' ? (
-            <div className="message-thread">
-              {messages.map((m, i) => (
-                <div className="message-item" key={i}>
-                  <div className={`message-avatar ${m.type}`}>{m.type === 'buyer' ? <User size={18} /> : m.type === 'seller' ? <Store size={18} /> : <User size={18} />}</div>
-                  <div className="message-content-wrapper">
-                    <div className="message-header"><div className="sender-info">{m.sender}<span className="sender-role">({m.role})</span></div><span className="message-time">{m.time}</span></div>
-                    <div className={`message-bubble ${m.type === 'admin' ? 'admin-note' : ''}`}>{m.content}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderDisputeResolution = () => {
+    const uniqueSellers = ['All Sellers', ...new Set(disputesList.map(d => d.sellerName).filter(Boolean))];
+    const statuses = ['All Status', 'Pending', 'Escalated', 'Resolved'];
+
+    const filteredDisputes = disputesList.filter(dispute => {
+      // 1. Status Filter
+      if (disputeStatusFilter !== 'All Status') {
+        if ((dispute.status || '').toLowerCase() !== disputeStatusFilter.toLowerCase()) return false;
+      }
+
+      // 2. Seller Filter
+      if (disputeSeller !== 'All Sellers') {
+        if (dispute.sellerName !== disputeSeller) return false;
+      }
+
+      // 3. Search Filter
+      if (disputeSearch.trim() !== '') {
+        const q = disputeSearch.toLowerCase();
+        const dispNo = (dispute.disputeNumber || '').toLowerCase();
+        const reason = (dispute.reason || '').toLowerCase();
+        const bName = (dispute.buyerName || '').toLowerCase();
+        const sName = (dispute.sellerName || '').toLowerCase();
+        const ordNo = (dispute.orderNumber || '').toLowerCase();
+        const iName = (dispute.itemName || '').toLowerCase();
+        
+        if (
+          !dispNo.includes(q) &&
+          !reason.includes(q) &&
+          !bName.includes(q) &&
+          !sName.includes(q) &&
+          !ordNo.includes(q) &&
+          !iName.includes(q)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    return (
+      <div className="dispute-resolution-view">
+        <div className="admin-view-header"><h2>Dispute Resolution Center</h2></div>
+        <div className="filters-bar" style={{ justifyContent: 'space-between', gap: '15px' }}>
+          <div className="search-bar-container" style={{ maxWidth: '400px' }}>
+            <Search size={18} />
+            <input 
+              type="text" 
+              placeholder="Search dispute #, reason, customer, seller..." 
+              value={disputeSearch}
+              onChange={(e) => setDisputeSearch(e.target.value)}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <select 
+              className="filter-select"
+              value={disputeStatusFilter}
+              onChange={(e) => setDisputeStatusFilter(e.target.value)}
+            >
+              {statuses.map((status, i) => (
+                <option key={i} value={status}>{status}</option>
+              ))}
+            </select>
+            <select 
+              className="filter-select"
+              value={disputeSeller}
+              onChange={(e) => setDisputeSeller(e.target.value)}
+            >
+              {uniqueSellers.map((seller, i) => (
+                <option key={i} value={seller}>{seller}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="refund-card-grid" style={{ marginTop: '20px' }}>
+          {filteredDisputes.length > 0 ? (
+            filteredDisputes.map((dispute, index) => (
+              <div className="dispute-card" key={index}>
+                <h4>Dispute {dispute.disputeNumber} - {dispute.orderNumber}</h4>
+                <p className="dispute-reason">{dispute.reason}</p>
+                <div className="dispute-info">
+                  <span>Item: {dispute.itemName}</span>
+                  <span>Buyer: {dispute.buyerName}</span>
+                </div>
+                <div className="dispute-footer">
+                  <span className={`status-badge ${dispute.status.toLowerCase()}`}>{dispute.status}</span>
+                  <div className="view-details-link" onClick={() => setSelectedDispute(dispute)}>
+                    <Eye size={14} />
+                    <span>View Details</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              <h4>Case Details</h4>
-              <div className="case-details-grid">
-                <div className="detail-item"><label>Buyer</label><span>{selectedDispute.buyer}</span></div>
-                <div className="detail-item"><label>Seller</label><span>{selectedDispute.seller}</span></div>
-                <div className="detail-item"><label>Item</label><span>{selectedDispute.item}</span></div>
-                <div className="detail-item"><label>Order ID</label><span>{selectedDispute.orderId}</span></div>
-                <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Dispute Reason</label><span>{selectedDispute.reason}</span></div>
-                <div className="detail-item" style={{ gridColumn: 'span 2' }}><label>Desired Outcome</label><span>{selectedDispute.outcome}</span></div>
               </div>
-            </>
+            ))
+          ) : (
+            <div className="no-records-message" style={{ gridColumn: 'span 2', textAlign: 'center', padding: '40px', color: '#999', fontSize: '14px', fontWeight: '500', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <span>No disputes found matching your criteria.</span>
+              {(disputeSearch || disputeSeller !== 'All Sellers' || disputeStatusFilter !== 'All Status') && (
+                <button 
+                  onClick={() => { setDisputeSearch(''); setDisputeSeller('All Sellers'); setDisputeStatusFilter('All Status'); }}
+                  style={{
+                    backgroundColor: '#5D4037',
+                    color: '#FFF',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#4E342E'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#5D4037'}
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
           )}
         </div>
-        <div className="action-info-group">
-          <div className="detail-section-card">
-            <h4>Action & Info</h4>
-            <div className="action-sub-group"><label>Mediation Tools</label><button className="btn-primary-blue"><Send size={16} /> Send Message</button><div className="request-info-link"><Info size={14} /> Request More Info</div></div>
-            <div className="action-sub-group" style={{ marginTop: '20px' }}><label>Make a Decision</label><button className="btn-decision-buyer"><ThumbsUp size={16} /> Rule in Favor of Buyer</button><button className="btn-decision-seller"><ThumbsDown size={16} /> Rule in Favor of Seller</button></div>
-            <div className="action-sub-group" style={{ marginTop: '20px' }}>
-              <label>Related Information</label>
-              <div className="related-links-list">
-                <div className="related-link"><User size={14} /> View Buyer's Profile</div><div className="related-link"><User size={14} /> View Seller's Profile</div><div className="related-link"><Package size={14} /> View Product Page</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
-  );
-
-  const renderDisputeResolution = () => (
-    <div className="dispute-resolution-view">
-      <div className="admin-view-header"><h2>Refund Workflow Management</h2></div>
-      <div className="filters-bar" style={{ justifyContent: 'flex-end', gap: '15px' }}><select className="filter-select"><option>Filter by Status</option></select><select className="filter-select"><option>All Sellers</option></select></div>
-      <div className="filters-bar" style={{ marginTop: '10px' }}><div className="search-bar-container" style={{ maxWidth: 'none' }}><Search size={18} /><input type="text" placeholder="Search by order ID, Customer Name, ......" /></div></div>
-      <div className="refund-card-grid" style={{ marginTop: '20px' }}>
-        {disputesList.map((dispute, index) => (
-          <div className="dispute-card" key={index}>
-            <h4>Dispute {dispute.disputeNumber} -</h4><p className="dispute-reason">{dispute.reason}</p><div className="dispute-info"><span>Item: {dispute.itemName}</span><span>Buyer: {dispute.buyerName}</span></div>
-            <div className="dispute-footer">
-              <span className={`status-badge ${dispute.status.toLowerCase()}`}>{dispute.status}</span>
-              <div className="view-details-link" onClick={() => setSelectedDispute(dispute)}><Eye size={14} /><span>View Details</span></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderSystemSettings = () => (
     <div className="system-settings-view">
