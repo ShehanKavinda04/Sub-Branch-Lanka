@@ -1969,8 +1969,28 @@ const AdminDashboard = () => {
               </div>
             ))
           ) : (
-            <div className="no-records-message" style={{ gridColumn: 'span 2', textAlign: 'center', padding: '40px', color: '#999', fontSize: '14px', fontWeight: '500' }}>
-              No refund requests found matching your criteria.
+            <div className="no-records-message" style={{ gridColumn: 'span 2', textAlign: 'center', padding: '40px', color: '#999', fontSize: '14px', fontWeight: '500', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <span>No refund requests found matching your criteria.</span>
+              {(refundSearch || refundSeller !== 'All Sellers') && (
+                <button 
+                  onClick={() => { setRefundSearch(''); setRefundSeller('All Sellers'); }}
+                  style={{
+                    backgroundColor: '#5D4037',
+                    color: '#FFF',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#4E342E'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#5D4037'}
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           )}
         </div>
