@@ -1093,6 +1093,12 @@ input:checked + .slider:before {
   margin-top: 10px;
 }
 
+.status-badge.pending {
+  background-color: #FFF3E0;
+  color: #E65100;
+  border: 1px solid #FFCC80;
+}
+
 .status-badge.escalated {
   background-color: #FFEBEE;
   color: #D32F2F;
@@ -1353,6 +1359,7 @@ input:checked + .slider:before {
 .message-avatar.buyer { background-color: #5C6BC0; }
 .message-avatar.seller { background-color: #EF6C00; }
 .message-avatar.admin { background-color: #E67E22; }
+.message-avatar.system { background-color: #78909C; }
 
 .message-content-wrapper {
   flex: 1;
@@ -1395,9 +1402,11 @@ input:checked + .slider:before {
   background-color: #FFF3E0;
 }
 
-.message-bubble.admin-note {
-  background-color: #FFF3E0;
+.message-bubble.admin-message {
+  background-color: #FBE9E7;
+  border-left: 3px solid #E67E22;
 }
+
 
 /* Evidence Tab Styles */
 .evidence-container {
@@ -1542,10 +1551,30 @@ input:checked + .slider:before {
   display: flex;
   gap: 15px;
   color: #777;
+  align-items: center;
 }
 
 .file-actions svg {
   cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.file-actions svg:first-child:hover {
+  color: #2196F3;
+  transform: scale(1.2);
+}
+
+.file-actions svg:last-child:hover {
+  color: #4CAF50;
+  transform: scale(1.2);
+}
+
+.download-link {
+  transition: opacity 0.2s ease;
+}
+
+.download-link:hover {
+  opacity: 0.75;
 }
 
 @media (max-width: 1200px) {

@@ -30,6 +30,7 @@ import {
   Video
 } from 'lucide-react';
 import './AdminDashboard.css';
+import Swal from 'sweetalert2';
 import adminAvatar from '../../assets/admin_avatar.png';
 import vaseImg from '../../assets/vases.png';
 import sareeImg from '../../assets/saree.png';
@@ -2085,6 +2086,241 @@ const AdminDashboard = () => {
 
     const messages = selectedDispute.messagesJson ? JSON.parse(selectedDispute.messagesJson) : defaultMessages;
 
+    const handleDownloadBuyerEvidence = async () => {
+      try {
+        // Convert each image to a base64 data URL so it can be embedded in the PDF
+        const imageDataUrls = await Promise.all(
+          buyerEvidence.images.map(async (imgUrl) => {
+            const response = await fetch(imgUrl);
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          })
+        );
+
+        const imagesHtml = imageDataUrls.map((dataUrl, i) => `
+          <div class="image-block">
+            <div class="image-label">Evidence Image ${i + 1} of ${imageDataUrls.length}</div>
+            <img src="${dataUrl}" alt="Buyer Evidence ${i + 1}" class="evidence-img" />
+          </div>
+        `).join('');
+
+        const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Buyer Evidence — Lanka Loom Dispute ${selectedDispute.disputeNumber || '#1234'}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 48px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 3px solid #5D4037; margin-bottom: 32px; }
+    .logo { font-size: 22px; font-weight: 800; color: #4A3E31; letter-spacing: 2px; }
+    .badge { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; }
+    h1 { font-size: 20px; font-weight: 700; color: #3E2723; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 32px; }
+    .section-title { font-size: 11px; font-weight: 700; color: #8D6E63; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #F1E6DA; padding-bottom: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 40px; margin-bottom: 32px; }
+    .field label { font-size: 11px; color: #aaa; display: block; margin-bottom: 3px; }
+    .field span { font-size: 14px; font-weight: 600; color: #333; }
+    .image-block { margin-bottom: 28px; page-break-inside: avoid; }
+    .image-label { font-size: 11px; color: #888; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .evidence-img { width: 100%; max-width: 480px; height: auto; border-radius: 8px; border: 1px solid #eee; display: block; }
+    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; font-size: 11px; color: #bbb; display: flex; justify-content: space-between; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">LANKA CRAFT</div>
+    <div class="badge">Buyer Evidence</div>
+  </div>
+  <h1>Buyer's Evidence — Dispute ${selectedDispute.disputeNumber || '#1234'}</h1>
+  <div class="subtitle">Downloaded ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+
+  <div class="section-title">Dispute Information</div>
+  <div class="grid">
+    <div class="field"><label>Dispute Number</label><span>${selectedDispute.disputeNumber || '#1234'}</span></div>
+    <div class="field"><label>Order Number</label><span>${selectedDispute.orderNumber || '#ORD1234'}</span></div>
+    <div class="field"><label>Dispute Reason</label><span>${selectedDispute.reason || 'Item not as described'}</span></div>
+    <div class="field"><label>Status</label><span>${selectedDispute.status || 'Pending'}</span></div>
+    <div class="field"><label>Buyer Name</label><span>${selectedDispute.buyerName || 'N/A'}</span></div>
+    <div class="field"><label>Item Name</label><span>${selectedDispute.itemName || 'N/A'}</span></div>
+    <div class="field"><label>Upload Date</label><span>${buyerEvidence.date}</span></div>
+    <div class="field"><label>Total Images</label><span>${imageDataUrls.length}</span></div>
+  </div>
+
+  <div class="section-title">Evidence Images</div>
+  ${imagesHtml}
+
+  <div class="footer">
+    <span>Lanka Craft Admin Portal — Confidential Buyer Evidence</span>
+    <span>Generated: ${new Date().toLocaleString()}</span>
+  </div>
+
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+
+        if (!printWindow) {
+          window.URL.revokeObjectURL(url);
+          Swal.fire({ icon: 'warning', title: 'Popup Blocked', text: 'Please allow popups for this site to enable PDF downloads.', confirmButtonColor: '#5D4037' });
+          return;
+        }
+
+        setTimeout(() => window.URL.revokeObjectURL(url), 8000);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'PDF Ready',
+          html: `<span style="font-size:13px;">The print dialog has opened.<br/>Select <strong>Save as PDF</strong> to download the buyer evidence report.</span>`,
+          confirmButtonColor: '#5D4037',
+          timer: 3500
+        });
+
+      } catch (error) {
+        console.error('Error generating buyer evidence PDF:', error);
+        Swal.fire({ icon: 'error', title: 'Download Failed', text: 'Could not generate the PDF. Please try again.', confirmButtonColor: '#5D4037' });
+      }
+    };
+
+    const handlePreviewFile = (file) => {
+      const isVideo = file.type === 'video';
+      Swal.fire({
+        title: '',
+        html: `
+          <div style="font-family: 'Inter', sans-serif; text-align: left;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px 0 12px 0; border-bottom: 1px solid #eee; margin-bottom: 16px;">
+              <div style="width: 44px; height: 44px; border-radius: 8px; background: ${isVideo ? '#E3F2FD' : '#FFEBEE'}; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                ${isVideo ? '🎬' : '📄'}
+              </div>
+              <div>
+                <div style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px;">${file.name}</div>
+                <div style="font-size: 12px; color: #999;">${isVideo ? 'Video File (MP4)' : 'PDF Document'} &nbsp;·&nbsp; ${file.size}</div>
+              </div>
+            </div>
+            <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 16px;">
+              <tr><td style="padding: 8px 0; color: #888; width: 45%;">Uploaded By</td><td style="color: #333; font-weight: 600;">${selectedDispute.sellerName || 'Silk Waves'}</td></tr>
+              <tr><td style="padding: 8px 0; color: #888;">Upload Date</td><td style="color: #333; font-weight: 600;">May 17, 2026</td></tr>
+              <tr><td style="padding: 8px 0; color: #888;">Related Dispute</td><td style="color: #333; font-weight: 600;">${selectedDispute.disputeNumber || '#1234'}</td></tr>
+              <tr><td style="padding: 8px 0; color: #888;">Related Order</td><td style="color: #333; font-weight: 600;">${selectedDispute.orderNumber || '#ORD1234'}</td></tr>
+            </table>
+            <div style="padding: 28px; background: #f8f9fa; border-radius: 10px; border: 2px dashed #ddd; text-align: center;">
+              <div style="font-size: 38px; margin-bottom: 10px;">${isVideo ? '🎬' : '📋'}</div>
+              <div style="font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px;">${isVideo ? 'Video Evidence Preview' : 'Document Evidence Preview'}</div>
+              <div style="font-size: 12px; color: #999; line-height: 1.6;">${isVideo ? 'Seller packaging & handling video.<br/>Download to view the full recording.' : 'Courier shipping receipt & tracking document.<br/>Download to view the full PDF.'}</div>
+            </div>
+          </div>
+        `,
+        confirmButtonText: '⬇ Download as PDF',
+        confirmButtonColor: '#5D4037',
+        showCancelButton: true,
+        cancelButtonText: 'Close',
+        cancelButtonColor: '#9e9e9e'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          handleDownloadSellerFile(file);
+        }
+      });
+    };
+
+    const handleDownloadSellerFile = (file) => {
+      const pdfFileName = file.name.replace(/\.[^.]+$/, '') + '.pdf';
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>${file.name} — Lanka Loom Evidence</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 48px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 3px solid #5D4037; margin-bottom: 32px; }
+    .logo { font-size: 22px; font-weight: 800; color: #4A3E31; letter-spacing: 2px; }
+    .badge { background: #FFF3E0; color: #E65100; border: 1px solid #FFCC80; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; }
+    h1 { font-size: 20px; font-weight: 700; color: #3E2723; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 32px; }
+    .section-title { font-size: 11px; font-weight: 700; color: #8D6E63; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #F1E6DA; padding-bottom: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 40px; margin-bottom: 32px; }
+    .field label { font-size: 11px; color: #aaa; display: block; margin-bottom: 3px; }
+    .field span { font-size: 14px; font-weight: 600; color: #333; }
+    .content-box { background: #FFF8F6; border: 1px solid #F1E6DA; border-radius: 8px; padding: 20px; margin-bottom: 32px; }
+    .content-box p { font-size: 13px; line-height: 1.8; color: #555; }
+    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; font-size: 11px; color: #bbb; display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">LANKA CRAFT</div>
+    <div class="badge">Evidence Document</div>
+  </div>
+  <h1>${file.name}</h1>
+  <div class="subtitle">Dispute Evidence — Downloaded ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+
+  <div class="section-title">Dispute Information</div>
+  <div class="grid">
+    <div class="field"><label>Dispute Number</label><span>${selectedDispute.disputeNumber || '#1234'}</span></div>
+    <div class="field"><label>Order Number</label><span>${selectedDispute.orderNumber || '#ORD1234'}</span></div>
+    <div class="field"><label>Dispute Reason</label><span>${selectedDispute.reason || 'Item not as described'}</span></div>
+    <div class="field"><label>Dispute Status</label><span>${selectedDispute.status || 'Pending'}</span></div>
+    <div class="field"><label>Buyer Name</label><span>${selectedDispute.buyerName || 'N/A'}</span></div>
+    <div class="field"><label>Seller Name</label><span>${selectedDispute.sellerName || 'N/A'}</span></div>
+    <div class="field"><label>Item Name</label><span>${selectedDispute.itemName || 'N/A'}</span></div>
+    <div class="field"><label>Desired Outcome</label><span>${selectedDispute.outcome || 'N/A'}</span></div>
+  </div>
+
+  <div class="section-title">Evidence File Details</div>
+  <div class="grid" style="margin-bottom: 32px;">
+    <div class="field"><label>File Name</label><span>${file.name}</span></div>
+    <div class="field"><label>File Size</label><span>${file.size}</span></div>
+    <div class="field"><label>File Type</label><span>${file.type === 'video' ? 'Video Evidence (MP4)' : 'PDF Document'}</span></div>
+    <div class="field"><label>Uploaded By</label><span>${selectedDispute.sellerName || 'Silk Waves'}</span></div>
+    <div class="field"><label>Upload Date</label><span>May 17, 2026</span></div>
+    <div class="field"><label>Download Date</label><span>${new Date().toLocaleDateString()}</span></div>
+  </div>
+
+  <div class="section-title">Notes</div>
+  <div class="content-box">
+    <p>This evidence file was submitted by the seller as part of the dispute resolution process for Dispute ${selectedDispute.disputeNumber || '#1234'}. The file has been securely stored and is available for review by the Lanka Craft administration team. Please refer to the dispute management portal for full case details.</p>
+  </div>
+
+  <div class="footer">
+    <span>Lanka Craft Admin Portal — Confidential Dispute Evidence</span>
+    <span>Generated: ${new Date().toLocaleString()}</span>
+  </div>
+
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const printWindow = window.open(url, '_blank');
+
+      if (!printWindow) {
+        window.URL.revokeObjectURL(url);
+        Swal.fire({ icon: 'warning', title: 'Popup Blocked', text: 'Please allow popups for this site to enable PDF downloads.', confirmButtonColor: '#5D4037' });
+        return;
+      }
+
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 5000);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'PDF Ready',
+        html: `<span style="font-size:13px;">The print dialog has opened.<br/>Select <strong>Save as PDF</strong> to download <strong>${pdfFileName}</strong>.</span>`,
+        confirmButtonColor: '#5D4037',
+        timer: 3000
+      });
+    };
+
     return (
       <div className="dispute-detail-view">
         <div className="admin-view-header">
@@ -2094,10 +2330,10 @@ const AdminDashboard = () => {
           </div>
         </div>
         <div className="dispute-detail-header-card">
-          <span className="dispute-id-label">Dispute ID {selectedDispute.id}</span>
+          <span className="dispute-id-label">Dispute {selectedDispute.disputeNumber || `#${selectedDispute.id}`}</span>
           <h3 className="dispute-title-large">{selectedDispute.reason}</h3>
-          <span className={`status-badge ${selectedDispute.status.toLowerCase()}`} style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
-            {selectedDispute.status}
+          <span className={`status-badge ${(selectedDispute.status || 'pending').toLowerCase().replace(' ', '-')}`} style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
+            {selectedDispute.status || 'Pending'}
           </span>
         </div>
         <div className="dispute-detail-tabs">
@@ -2115,7 +2351,7 @@ const AdminDashboard = () => {
                   <div className="evidence-image-grid">
                     {buyerEvidence.images.map((img, i) => <img src={img} alt="Evidence" className="evidence-img" key={i} />)}
                   </div>
-                  <div className="evidence-footer"><span>{buyerEvidence.count} images files</span><div className="download-link"><Download size={14} /> Download All</div></div>
+                  <div className="evidence-footer"><span>{buyerEvidence.count} images files</span><div className="download-link" onClick={handleDownloadBuyerEvidence} style={{ cursor: 'pointer' }}><Download size={14} /> Download All</div></div>
                   <div className="admin-comments-section">
                     <h5>Admin Comments</h5>
                     {selectedDispute.adminComment && (
@@ -2153,7 +2389,10 @@ const AdminDashboard = () => {
                     {sellerEvidence.files.map((file, i) => (
                       <div className="file-item" key={i}>
                         <div className="file-info"><div className={`file-icon ${file.type === 'video' ? 'video' : ''}`}>{file.type === 'video' ? <Video size={18} /> : <FileIcon size={18} />}</div><div className="file-details"><h6>{file.name}</h6><span>{file.size}</span></div></div>
-                        <div className="file-actions"><Eye size={16} /><Download size={16} /></div>
+                        <div className="file-actions">
+                          <Eye size={16} onClick={() => handlePreviewFile(file)} style={{ cursor: 'pointer' }} />
+                          <Download size={16} onClick={() => handleDownloadSellerFile(file)} style={{ cursor: 'pointer' }} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -2161,13 +2400,22 @@ const AdminDashboard = () => {
               </div>
             ) : disputeTab === 'Communication' ? (
               <div className="communication-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div className="message-thread" style={{ maxHeight: '380px', overflowY: 'auto' }}>
-                  {messages.map((m, i) => (
-                    <div className="message-item" key={i}>
-                      <div className={`message-avatar ${m.type}`}>{m.type === 'buyer' ? <User size={18} /> : m.type === 'seller' ? <Store size={18} /> : <User size={18} />}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '12px', color: '#aaa', fontWeight: '500' }}>{[...messages].reverse().length} messages</span>
+                  <span style={{ fontSize: '11px', color: '#bbb', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    Newest first
+                  </span>
+                </div>
+                <div className="message-thread" style={{ overflowY: 'auto', maxHeight: '360px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+                  {[...messages].reverse().map((m, i) => (
+                    <div className="message-item" key={i} style={{ opacity: i === 0 ? 1 : 0.92 }}>
+                      <div className={`message-avatar ${m.type}`}>
+                        {m.type === 'buyer' ? <User size={18} /> : m.type === 'seller' ? <Store size={18} /> : m.type === 'admin' ? <Gavel size={18} /> : <Info size={18} />}
+                      </div>
                       <div className="message-content-wrapper">
                         <div className="message-header"><div className="sender-info">{m.sender}<span className="sender-role">({m.role})</span></div><span className="message-time">{m.time}</span></div>
-                        <div className={`message-bubble ${m.type === 'system' ? 'admin-note' : ''}`}>{m.content}</div>
+                        <div className={`message-bubble ${m.type === 'system' ? 'admin-note' : m.type === 'admin' ? 'admin-message' : ''}`}>{m.content}</div>
                       </div>
                     </div>
                   ))}
@@ -2229,8 +2477,111 @@ const AdminDashboard = () => {
           <div className="action-info-group">
             <div className="detail-section-card">
               <h4>Action & Info</h4>
-              <div className="action-sub-group"><label>Mediation Tools</label><button className="btn-primary-blue"><Send size={16} /> Send Message</button><div className="request-info-link"><Info size={14} /> Request More Info</div></div>
-              <div className="action-sub-group" style={{ marginTop: '20px' }}><label>Make a Decision</label><button className="btn-decision-buyer" onClick={() => handleDisputeDecision('Full Refund')}><ThumbsUp size={16} /> Rule in Favor of Buyer</button><button className="btn-decision-seller" onClick={() => handleDisputeDecision('Dismissed')}><ThumbsDown size={16} /> Rule in Favor of Seller</button></div>
+
+              {/* Mediation Tools */}
+              <div className="action-sub-group">
+                <label>Mediation Tools</label>
+                <button
+                  className="btn-primary-blue"
+                  onClick={() => setDisputeTab('Communication')}
+                  title="Switch to Communication tab to send a message"
+                >
+                  <Send size={16} /> Send Message
+                </button>
+                <div
+                  className="request-info-link"
+                  style={{ cursor: 'pointer' }}
+                  onClick={async () => {
+                    const { value: infoRequest, isConfirmed } = await Swal.fire({
+                      title: 'Request More Information',
+                      html: `<p style="font-size:13px;color:#666;margin-bottom:12px;">Send an official request to <strong>${selectedDispute.buyerName}</strong> and <strong>${selectedDispute.sellerName}</strong> for additional evidence or clarification.</p>`,
+                      input: 'textarea',
+                      inputPlaceholder: 'Describe what additional information or evidence is needed...',
+                      inputAttributes: { rows: 4, style: 'font-size:13px;resize:none;' },
+                      confirmButtonText: 'Send Request',
+                      confirmButtonColor: '#4285F4',
+                      showCancelButton: true,
+                      cancelButtonColor: '#9e9e9e',
+                      inputValidator: (value) => { if (!value?.trim()) return 'Please enter a request message.' }
+                    });
+                    if (isConfirmed && infoRequest?.trim()) {
+                      const message = `[Info Request] ${infoRequest.trim()}`;
+                      try {
+                        const res = await fetch(`http://localhost:8082/api/admin/disputes/${selectedDispute.id}/message`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(message)
+                        });
+                        if (res.ok) {
+                          const updated = await res.json();
+                          setDisputesList(prev => prev.map(d => d.id === updated.id ? updated : d));
+                          setSelectedDispute(updated);
+                          setDisputeTab('Communication');
+                          Swal.fire({ icon: 'success', title: 'Request Sent', text: 'Your information request has been added to the communication thread.', confirmButtonColor: '#4285F4', timer: 2000 });
+                        }
+                      } catch (e) { console.error('Error sending info request:', e); }
+                    }
+                  }}
+                >
+                  <Info size={14} /> Request More Info
+                </div>
+              </div>
+
+              {/* Make a Decision */}
+              <div className="action-sub-group" style={{ marginTop: '20px' }}>
+                <label>Make a Decision</label>
+                {selectedDispute.status === 'Resolved' ? (
+                  <div style={{ padding: '12px', background: '#E8F5E9', borderRadius: '8px', border: '1px solid #A5D6A7', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#2E7D32', marginBottom: '4px' }}>✓ Dispute Resolved</div>
+                    <div style={{ fontSize: '12px', color: '#388E3C' }}>Outcome: ${selectedDispute.outcome}</div>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      className="btn-decision-buyer"
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          title: 'Rule in Favor of Buyer?',
+                          html: `<p style="font-size:13px;color:#555;">This will mark the dispute as <strong>Resolved</strong> with outcome <strong>"Full Refund"</strong> for <strong>${selectedDispute.buyerName}</strong>.<br/><br/>This action cannot be undone.</p>`,
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonText: '✓ Confirm Decision',
+                          confirmButtonColor: '#4CAF50',
+                          cancelButtonColor: '#9e9e9e'
+                        });
+                        if (result.isConfirmed) {
+                          await handleDisputeDecision('Full Refund');
+                          Swal.fire({ icon: 'success', title: 'Decision Recorded', text: 'Dispute resolved in favor of the Buyer. Full refund will be processed.', confirmButtonColor: '#4CAF50', timer: 2500 });
+                        }
+                      }}
+                    >
+                      <ThumbsUp size={16} /> Rule in Favor of Buyer
+                    </button>
+                    <button
+                      className="btn-decision-seller"
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          title: 'Rule in Favor of Seller?',
+                          html: `<p style="font-size:13px;color:#555;">This will mark the dispute as <strong>Resolved</strong> with outcome <strong>"Dismissed"</strong> in favor of <strong>${selectedDispute.sellerName}</strong>.<br/><br/>This action cannot be undone.</p>`,
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonText: '✓ Confirm Decision',
+                          confirmButtonColor: '#333',
+                          cancelButtonColor: '#9e9e9e'
+                        });
+                        if (result.isConfirmed) {
+                          await handleDisputeDecision('Dismissed');
+                          Swal.fire({ icon: 'success', title: 'Decision Recorded', text: 'Dispute resolved in favor of the Seller. Case has been dismissed.', confirmButtonColor: '#333', timer: 2500 });
+                        }
+                      }}
+                    >
+                      <ThumbsDown size={16} /> Rule in Favor of Seller
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Related Information */}
               <div className="action-sub-group" style={{ marginTop: '20px' }}>
                 <label>Related Information</label>
                 <div className="related-links-list">
