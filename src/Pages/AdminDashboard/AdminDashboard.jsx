@@ -379,6 +379,128 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleHelpClick = () => {
+    Swal.fire({
+      title: '<strong>Lanka Loom Admin Help Center</strong>',
+      icon: 'info',
+      html: `
+        <div style="text-align: left; font-family: 'Inter', sans-serif; line-height: 1.6;">
+          <p style="color: #666; margin-bottom: 20px;">Welcome to the Lanka Loom Administrative Support system. Here you can easily manage the platform's core resources:</p>
+          <ul style="padding-left: 20px; color: #444; margin-bottom: 20px;">
+            <li><strong>Dashboard</strong>: High-level metrics on Sales, Orders, Sellers, and Categories.</li>
+            <li><strong>User Management</strong>: Create new users, search, filter, and change user roles or status.</li>
+            <li><strong>Seller Management</strong>: Approve pending artisan registration and suspend or activate current sellers.</li>
+            <li><strong>Product Approval</strong>: Keep the quality high by approving, rejecting, or requesting edits on handcraft products before they list.</li>
+            <li><strong>Order Monitoring</strong>: Search and inspect active or completed transactions, and create manual orders.</li>
+            <li><strong>Content Management</strong>: Setup and manage banner advertisements or holiday sales campaigns.</li>
+            <li><strong>Refund Workflow</strong>: Address buyer cancellation requests and process returns systematically.</li>
+            <li><strong>Dispute Resolution</strong>: Administer disputes and communicate directly with buyers and sellers in real-time.</li>
+          </ul>
+          <div style="border-top: 1px solid #eee; padding-top: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 13px; color: #8D6E63; font-weight: 600;">System Helpdesk: support@lankacraft.lk | Extension 301</p>
+          </div>
+        </div>
+      `,
+      showCloseButton: true,
+      confirmButtonColor: '#8D6E63',
+      confirmButtonText: 'Got it, Thanks!'
+    });
+  };
+
+  const handleLogoutClick = () => {
+    Swal.fire({
+      title: 'Terminate Session?',
+      text: "Are you sure you want to log out? Your online status in the database will be updated dynamically.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8D6E63',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, Log Out',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: 'Logging out...',
+          html: 'Connecting to database and updating administrator session status...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        try {
+          const response = await fetch('http://localhost:8082/api/admin/users/logout', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (response.ok) {
+            // Update local usersList to reflect status change dynamically
+            const updatedUsersRes = await fetch('http://localhost:8082/api/admin/users');
+            if (updatedUsersRes.ok) {
+              setUsersList(await updatedUsersRes.json());
+            }
+
+            Swal.fire({
+              title: 'Logged Out Successfully!',
+              text: 'The database has been updated in real-time. You are now offline.',
+              icon: 'success',
+              confirmButtonColor: '#8D6E63',
+              confirmButtonText: 'Log Back In'
+            }).then(async (resClick) => {
+              if (resClick.isConfirmed) {
+                Swal.fire({
+                  title: 'Logging back in...',
+                  html: 'Updating database to restore administrator active session...',
+                  allowOutsideClick: false,
+                  didOpen: () => {
+                    Swal.showLoading();
+                  }
+                });
+
+                try {
+                  const adminUser = usersList.find(u => u.role === 'Admin');
+                  const adminId = adminUser ? adminUser.id : 1;
+                  
+                  await fetch(`http://localhost:8082/api/admin/users/${adminId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify('Active')
+                  });
+
+                  const finalUsersRes = await fetch('http://localhost:8082/api/admin/users');
+                  if (finalUsersRes.ok) {
+                    setUsersList(await finalUsersRes.json());
+                  }
+
+                  Swal.fire({
+                    title: 'Welcome Back!',
+                    text: 'Database successfully updated to Active (Online).',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                  });
+                } catch (err) {
+                  console.error("Error logging back in:", err);
+                }
+              }
+            });
+          } else {
+            throw new Error("Failed to logout in database.");
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
+          Swal.fire({
+            title: 'Logout Failed',
+            text: 'Could not communicate with database. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#8D6E63'
+          });
+        }
+      }
+    });
+  };
+
   const formatCurrency = (value) => {
     return `LKR ${value?.toLocaleString()}`;
   };
@@ -3370,7 +3492,7 @@ const AdminDashboard = () => {
         <div className="admin-profile"><img src={adminAvatar} alt="Admin" className="admin-avatar" /><div className="admin-info"><h3>{translate('Ayodya Senavirathne')}</h3><p>{translate('Admin')}</p></div></div>
         <nav className="sidebar-nav">
           {navItems.map((item) => (<div key={item.name} className={`nav-item ${activeTab === item.name ? 'active' : ''}`} onClick={() => { setActiveTab(item.name); setSelectedDispute(null); }}>{item.icon}<span>{translate(item.name)}</span></div>))}
-          <div className="nav-item-bottom"><div className="nav-item"><HelpCircle size={20} /><span>{translate('Help')}</span></div><div className="nav-item"><LogOut size={20} /><span>{translate('Logout')}</span></div></div>
+          <div className="nav-item-bottom"><div className="nav-item" onClick={handleHelpClick}><HelpCircle size={20} /><span>{translate('Help')}</span></div><div className="nav-item" onClick={handleLogoutClick}><LogOut size={20} /><span>{translate('Logout')}</span></div></div>
         </nav>
       </aside>
       <main className="admin-main-content">
