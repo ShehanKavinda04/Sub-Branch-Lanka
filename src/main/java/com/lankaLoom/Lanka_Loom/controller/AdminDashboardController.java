@@ -55,6 +55,17 @@ public class AdminDashboardController {
         return adminDashboardService.addUser(user);
     }
 
+    @PutMapping("/users/logout")
+    public User logoutAdmin() {
+        return adminDashboardService.logoutAdmin();
+    }
+
+    @PutMapping("/users/{id}/status")
+    public User updateUserStatus(@PathVariable Long id, @RequestBody String status) {
+        String cleanStatus = status.replace("\"", "");
+        return adminDashboardService.updateUserStatus(id, cleanStatus);
+    }
+
     @GetMapping("/sales-over-time")
     public List<ChartDataDTO> getSalesOverTime() {
         return adminDashboardService.getSalesOverTime();

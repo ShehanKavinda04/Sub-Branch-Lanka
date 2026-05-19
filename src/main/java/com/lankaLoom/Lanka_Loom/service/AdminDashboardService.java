@@ -72,6 +72,22 @@ public class AdminDashboardService {
         return userRepository.save(user);
     }
 
+    public com.lankaLoom.Lanka_Loom.model.User logoutAdmin() {
+        com.lankaLoom.Lanka_Loom.model.User admin = userRepository.findAll().stream()
+                .filter(u -> "Admin".equalsIgnoreCase(u.getRole()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Admin user not found"));
+        admin.setStatus("Inactive");
+        return userRepository.save(admin);
+    }
+
+    public com.lankaLoom.Lanka_Loom.model.User updateUserStatus(Long id, String status) {
+        com.lankaLoom.Lanka_Loom.model.User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(status);
+        return userRepository.save(user);
+    }
+
     public List<ChartDataDTO> getSalesOverTime() {
         // Simple grouping by order date for demo
         return orderRepository.findAll().stream()

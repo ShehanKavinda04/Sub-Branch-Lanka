@@ -148,7 +148,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         if (userRepository.count() == 0) {
-            userRepository.save(User.builder().name("Admin User").email("admin@lankacraft.lk").role("Admin").status("Active").registrationDate(LocalDate.now().toString()).build());
+            userRepository.save(User.builder().name("Ayodya Senavirathne").email("admin@lankacraft.lk").role("Admin").status("Active").registrationDate(LocalDate.now().toString()).build());
             userRepository.save(User.builder().name("John Doe").email("john@example.com").role("Buyer").status("Active").registrationDate(LocalDate.now().minusDays(4).toString()).build());
             userRepository.save(User.builder().name("Jane Smith").email("jane@example.com").role("Seller").status("Active").registrationDate(LocalDate.now().minusDays(15).toString()).build());
             userRepository.save(User.builder().name("Robert Brown").email("robert@example.com").role("Buyer").status("Inactive").registrationDate(LocalDate.now().minusDays(50).toString()).build());
